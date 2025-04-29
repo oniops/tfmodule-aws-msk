@@ -7,6 +7,16 @@ output "arn" {
   value = try(aws_msk_cluster.this[0].arn, null)
 }
 
+output "cluster_name" {
+  description = "Name of the MSK cluster"
+  value = try(aws_msk_cluster.this[0].cluster_name, null)
+}
+
+output "cluster_uuid" {
+  description = "UUID of the MSK cluster, for use in IAM policies"
+  value = try(aws_msk_cluster.this[0].cluster_uuid, null)
+}
+
 output "bootstrap_brokers" {
   description = "Comma separated list of one or more hostname:port pairs of kafka brokers suitable to bootstrap connectivity to the kafka cluster"
   value = sort(compact([
@@ -40,21 +50,6 @@ output "bootstrap_brokers_tls" {
 output "bootstrap_brokers_authentication" {
   description = "Name string of brokers authentication for client."
   value = var.enable_client_auth_iam ? "SASL_IAM" : var.enable_client_auth_scram ? "SASL_SCRAM" : "TLS"
-}
-
-output "cluster_name" {
-  description = "Name of the MSK cluster"
-  value = try(aws_msk_cluster.this[0].cluster_name, null)
-}
-
-output "cluster_uuid" {
-  description = "UUID of the MSK cluster, for use in IAM policies"
-  value = try(aws_msk_cluster.this[0].cluster_uuid, null)
-}
-
-output "current_version" {
-  description = "Current version of the MSK Cluster used for updates, e.g. `K13V1IB3VIYZZH`"
-  value = try(aws_msk_cluster.this[0].current_version, null)
 }
 
 output "zookeeper_connect_string" {

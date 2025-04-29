@@ -1,90 +1,22 @@
 # tfmodule-aws-msk
-tfmodule-aws-msk is terraform module which creates AWS MSK(Managed Streaming for Apache Kafka) resources
-<br>
-This module is developed with reference to [terraform-aws-msk-kafka-cluster](https://github.com/terraform-aws-modules/terraform-aws-msk-kafka-cluster) Repository.
 
-## How to clone?
-```
+tfmodule-aws-msk is terraform module which creates AWS MSK(Managed Streaming for Apache Kafka) resources.
+<br>
+This module is customized from [terraform-aws-msk-kafka-cluster](https://github.com/terraform-aws-modules/terraform-aws-msk-kafka-cluster), and follows the license policy of [terraform-aws-msk-kafka-cluster](https://github.com/terraform-aws-modules/terraform-aws-msk-kafka-cluster).
+
+## How to clone
+
+```sh
 git clone https://github.com/oniops/tfmodule-aws-msk.git
 cd tfmodule-aws-msk
 ```
 
-## What is MSK?
-Amazon Managed Streaming for Apache Kafka (Amazon MSK) is a fully managed service that enables you to build and run applications that use Apache Kafka to process streaming data. Amazon MSK provides the control-plane operations, such as those for creating, updating, and deleting clusters. It lets you use Apache Kafka data-plane operations, such as those for producing and consuming data. It runs open-source versions of Apache Kafka. This means existing applications, tooling, and plugins from partners and the Apache Kafka community are supported without requiring changes to application code.
-<br>
-Please refer to [Amazon MSK Developer Guide](https://docs.aws.amazon.com/msk/latest/developerguide/what-is-msk.html) for more details.
-
-## MSK Architecture
-TODO :: 여기에 아키텍처 그림이 포함 됩니다
-
-## Resources
-The main resources provisioned through the `tfmodule-aws-msk` are described below.
-
-### MSK Cluster
- - MSK Cluster는 메세지 데이터를 저장 및 처리하는 브로커 노드와 메타데이터 관리 노드로 구성됩니다.
- - 메타데이터 관리 모드는 Zookeeper와 Kraft가 있으며, Kraft 모드를 사용하는 경우 메타데이터 관리는 브로커 노드에 통합 됩니다.
- - AWS MSK는 기본적으로 Zookeeper 관리와 유지보수를 자동화하여 사용자가 직접 관리하지 않아도 됩니다.
-> Note: Apache Kafka 4.0 버전부터 Zookeeper 노드는 더이상 지원하지 않고, 브로커 노드와 통합된 Kraft 가 메타데이터를 관리 합니다.
-- MSk Cluster의 종류에는 `Provisioned`와 `Serverless`타입이 있습니다.
-- `Provisioned` 타입은 브로커 인스턴스 유형 및 노드 수, 스토리지 볼륨을 수동으로 구성하고 확장합니다.
-- `Serverless` 타입은 클러스터 용량을 관리하고 조정 할 필요 없이 사용할 수 있도록 합니다.
-
-#### Broker
- - 브로커 노드에서는 메세지를 실제로 저장하고 처리합니다.
-- `Provisioned` 타입의 MSK Cluster인 경우 브로커의 종류와 타입을 설정해야 합니다.
- - 브로커의 종류에는 `Standard`와 `Express`타입이 있습니다.
- - `Standard` 타입은 스토리지의 볼륨을 수동으로 구성하고 확장하며, 대부분의 클러스터 Configuration을 관리 합니다.
- - `Express` 타입은 스토리지의 볼륨을 자동으로 구성하고 확장하며, 일부의 클러스터 Configuration만 관리 합니다.
-
-#### Available Zone
- - `Provisioned` 타입의 MSK Cluster인 경우 브로커 노드가 배치 될 가용영역을 결정해야 합니다.
- - 브로커 노드는 최소 2개 ~ 최대 3개의 가용영역에 배치되어야 하며, `Express` 타입의 브로커의 경우 3개의 가용영역에 배치되어야 합니다.
- - 각 가용영역에 배치되는 브로커 노드의 개수를 설정할 수 있으며, 최소 1개의 브로커가 각 가용영역에 배치되어야 합니다.
-
-#### Storage
-- `Provisioned` 타입의 MSK Cluster에서, 브로커 타입이 `Standard` 인 경우 스토리지 볼륨을 수동으로 구성해야 합니다. `Express` 에서는 자동으로 구성되므로 설정이 불필요 합니다.
-- `Provisioned Throuput` 을 이용하여 스토리지의 I/O 성능을 설정할 수 있습니다.
-- 계층형 스토리지를 이용하여 일정 시간이 지난 데이터를 저렴한 스토리지로 이동할 수 있습니다. 자세한 내용은 [Amazone MSK 주제에 대해 로그 세그먼트를 계층형 스토리지로 복사 하는 방법](https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/msk-tiered-storage-retention-rules.html) 문서를 참고 하세요.
-- 오토스케일링을 이용하여 스토리지 볼륨 크기를 확장할 수 있습니다. 자세한 내용은 [Amazon MSK 클러스터를 위한 오토 스케일링 설정](https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/msk-autoexpand-setup.html) 문서를 참고 하세요.
-> Note: 스토리지 볼륨 사이즈 조정은 스케일 아웃만 지원하며, 6시간에 한번만 가능 합니다.
-
-#### Subnet
- - MSK Cluster의 브로커 노드가 배치 될 서브넷을 구성 합니다.
-
-#### Security Group
- - MSK Cluster를 위한 보안 그룹을 구성 합니다.
- - Consumer와 Producer 어플리케이션이 클러스터에 접근할 수 있도록 인바운트 트래픽을 허용해야 합니다.
-
-#### Connectivity
- - MSK Cluster의 Public Access 활성화 여부를 결정 합니다.
- - 다른 VPC에 있는 클라이언트가 MSK Cluster에 접근할 수 있도록 설정할 수 있습니다.
-
-#### Authentication
- - 클라이언트가 클러스터에 접근할 때 사용하는 인증 방식을 결정 합니다.
- - 인증은 `noauth`, `sasl/iam`, `sasl/scram` 3가지 방식이 존재 합니다.
- - `noauth` 방식을 사용하면 클라이언트는 인증 없이 클러스터에 접근이 가능 합니다
- - `sasl/iam` 방식을 사용하면 클라이언트는 IAM 정책에 의해서 접근이 제어 됩니다.
- - `sasl/scram` 방식을 사용하면 클라이언트는 등록된 크리덴셜(ID/PW)을 입력하여 접근 합니다.
- - 위 3가지 인증방식과는 별도로 `mTLS` 를 활성화 할 수 있습니다. AWS ACM과 통합하여 클라이언트 연결 시 MSK Cluster에서 클라이언트의 인증서를 검증 합니다.
-
-#### Encryption
- - MSK Cluster 스토리지 및 내/외부에서 통신 시 암호화 여부를 설정 합니다.
- - 스토리지는 KMS 키와 통합되어 암호화 할 수 있습니다.
- - 내/외부 통신의 암호화 유무는 각각 설정할 수 있으며, 설정 시 TLS 암호화 됩니다.
-
-#### Configuration
- - 브로커 노드의 Configuration을 설정 합니다. Configuration은 브로커의 동작을 제어하는 키-값 쌍의 속성 집합입니다.
- - 예를들어, 파티션 수, 메세지 수명주기, Network/Storage IO Thread 수 등을 설정할 수 있습니다.
- - 각 Configuration은 Revision으로 관리 됩니다.
-
-#### Logging & Monitoring
- - MSK Cluster의 리소스 사용량 등의 지표를 Cloudwatch와 통합하여 모니터링 할 수 있습니다. `Provisioned` 타입의 MSK Cluster에서 브로커 타입이 `Standard`인 경우 통합 시 Level을 설정하여 더 디테일한 대상 매트릭 설정이 가능합니다. 자세한 내용은 [CloudWatch를 사용하여 표준 브로커 머니터링을 위한 Amazone MSK 지표](https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/metrics-details.html) 문서를 참고하세요.
- - MSK Cluster의 모니터링은 Prometheus와 통합될 수 있습니다. 자세한 내용은 [Promethus를 사용하여 MSK Provisioned Cluster 모니터링](https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/open-monitoring.html) 문서를 참고하세요/
- - 로그는 Cloudwatch Log Groups, Firehose, S3와 통합될 수 있습니다.
-
 ## Variables
-`tfmodule-aws-msk` 모듈에서 사용되는 Input / Output 변수에 대한 설명 입니다.
+
+tf-module-aws-msk에서 사용되는 Input/Output 변수에 대해서 설명 합니다.
+
 ### Input Variables
+
 <table>
 <thead>
     <tr>
@@ -99,36 +31,60 @@ The main resources provisioned through the `tfmodule-aws-msk` are described belo
 <tbody>
     <tr>
         <td>create</td>
-        <td>MSK Cluster의 생성 유무를 결정 합니다.</td>
+        <td>Create or not MSK Cluster resource.</td>
         <td>bool</td>
         <td>true</td>
         <td>no</td>
         <td>false</td>
     </tr>
     <tr>
-        <td>cluster_tags</td>
-        <td>MSK Cluster 리소스에 대한 태그를 설정 합니다.</td>
+        <td>context</td>
+        <td>Specify context values. This module uses the tfmodule-context Terraform module to define MSK services and resources, providing a standardized naming policy and tagging conventions, and a consistent datasource reference module. For more information about Context, see the <a href="https://github.com/oniops/tfmodule-context">tfmodule-context</a>Terraform module.</td>
         <td>map(string)</td>
-        <td>null</td>
-        <td>no</td>
-        <td>{Name = "My-MSK-Cluster", Onwer = "Me"}</td>
+        <td></td>
+        <td>yes</td>
+        <td>See: <a href="https://github.com/oniops/tfmodule-context">tfmodule-context</a></td>
     </tr>
     <tr>
-        <td>tags</td>
-        <td>MSK Cluster 외 리소스에 대한 태그를 설정 합니다.</td>
+        <td>cluster_name</td>
+        <td>Name of the MSK cluster. The name format depends on Context values. Please refer "name_prefix" value in <a href="https://github.com/oniops/tfmodule-context">tfmodule-context</a> module.</td>
+        <td>string</td>
+        <td>null</td>
+        <td>no</td>
+        <td>"my-cluster"</td>
+    </tr>
+    <tr>
+        <td>cluster_fullname</td>
+        <td>Fullname of the MSK cluster. If you don't want to set auto-formatted MSK Cluster name due to Context values, you can specify this value.</td>
+        <td>string</td>
+        <td>null</td>
+        <td>no</td>
+        <td>"my-cluster-full-name"</td>
+    </tr>    
+    <tr>
+        <td>additional_tags</td>
+        <td>Specify additional tags for resources created in this module. All default tags for all resources depend on Context values. Please refer "tags" value in <a href="https://github.com/oniops/tfmodule-context">tfmodule-context</a> module.</td>
         <td>map(string)</td>
         <td>null</td>
         <td>no</td>
-        <td>{Name = "My-Autoscaling", Onwer = "Me"}</td>
+        <td>{Timestamp = "20101231", CompanyURL = "https://my-company-url.com"}</td>
     </tr>
     <tr>
         <td>enable_serverless_cluster</td>
-        <td>MSK Cluster의 타입을 설정 합니다. true인 경우 Provisioned, false인 경우 Serverless 타입으로 생성 됩니다.</td>
+        <td>Specify deployment type of MSK Cluster. If true, the type will be set as "Serverless". If false, the type will be set as "Provisioned"</td>
         <td>bool</td>
         <td>false</td>
         <td>no</td>
         <td>false</td>
     </tr>
+    <tr>
+        <td>kafka_version</td>
+        <td>(Cluster type - Provisioned only) Specify the desired Kafka software version. See <a href="https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/supported-kafka-versions.html">For supported Apache Kafka version.</a></td>
+        <td>string</td>
+        <td>null</td>
+        <td>no</td>
+        <td>"3.6.0"</td>
+    </tr>    
     <tr>
         <td>client_subnets</td>
         <td>A list of subnets to connect to in client VPC. <a href="https://docs.aws.amazon.com/msk/1.0/apireference/clusters.html#clusters-prop-brokernodegroupinfo-clientsubnets">document</a></td>
@@ -139,20 +95,28 @@ The main resources provisioned through the `tfmodule-aws-msk` are described belo
     </tr>
     <tr>
         <td>public_access_type</td>
-        <td>Allow or not access from public to broker.</td>
+        <td>Allow or not access from public to broker. "DISABLED" means that public access is turned off. "SERVICE_PROVIDED_EIPS" means that public access is turned on</td>
         <td>string</td>
         <td>"DISABLED"</td>
         <td>no</td>
-        <td>"DISABLED" means that public access is turned off. "SERVICE_PROVIDED_EIPS" means that public access is turned on</td>
+        <td>"DISABLED" or "SERVICE_PROVIDED_EIPS"</td>
     </tr>
     <tr>
         <td>instance_type</td>
-        <td>Specify the instance type to use for the kafka brokers. e.g. kafka.m5.large.</td>
+        <td>(Cluster type - Provisioned only) Specify the instance type to use for the kafka brokers. You can select not only instance type, also broker type (Standard or Express).</td>
         <td>string</td>
         <td>null</td>
         <td>no</td>
-        <td>See: <a href="https://aws.amazon.com/msk/pricing/">Pricing Info</a></td>
+        <td>See: <a href="https://aws.amazon.com/msk/pricing/">MSK Broker Instance Types</a></td>
     </tr>
+    <tr>
+        <td>number_of_broker_nodes</td>
+        <td>(Cluster type - Provisioned only) The desired total number of broker nodes in the kafka cluster. The number must be the same or multiple of available zone.</td>
+        <td>number</td>
+        <td>null</td>
+        <td>no</td>
+        <td>1</td>
+    </tr>    
     <tr>
         <td>security_groups</td>
         <td>A list of the security groups to associate with the elastic network interfaces to control who can communicate with the cluster</td>
@@ -163,15 +127,15 @@ The main resources provisioned through the `tfmodule-aws-msk` are described belo
     </tr>
     <tr>
         <td>ebs_volume_size</td>
-        <td>EBS Storage volumes size attached to MSK broker nodes. min: 1, max: 16384, unit: GiB</td>
+        <td>(Cluster type - Provisioned/Standard Broker node only) EBS Storage volumes size attached to MSK broker nodes only for standard type. The storage only can be scaled-out (not scaled-in).</td>
         <td>number</td>
         <td>1000</td>
         <td>no</td>
-        <td>512</td>
+        <td>512 (min: 1, max: 16384, unit: GiB)</td>
     </tr>
     <tr>
         <td>enable_provisioned_throughput</td>
-        <td>Provisioned throughput is enabled or not.</td>
+        <td>(Cluster type - Provisioned/Standard Broker node only) Provisioned throughput is enabled or not. You can set storage I/O performance to enable this option.</td>
         <td>bool</td>
         <td>false</td>
         <td>no</td>
@@ -179,15 +143,95 @@ The main resources provisioned through the `tfmodule-aws-msk` are described belo
     </tr>
     <tr>
         <td>provisioned_volume_throughput</td>
-        <td>Throughput value of the EBS volumes for the data drive on each kafka broker node in MiB per second.</td>
+        <td>(Cluster type - Provisioned/Standard Broker node only) Throughput value of the storage I/O performance for the data drive on each kafka broker node in MiB per second.</td>
         <td>number</td>
         <td>250</td>
         <td>no</td>
         <td>500</td>
     </tr>
     <tr>
+        <td>enable_storage_autoscaling</td>
+        <td>(Cluster type - Provisioned/Standard Broker node only) Determines whether autoscaling is enabled for storage. The autoscaling is only for scale-out of storage. The storage can be expended only once in 6 hours.</td>
+        <td>bool</td>
+        <td>false</td>
+        <td>no</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>scaling_max_size</td>
+        <td>(Cluster type - Provisioned/Standard Broker node only) Max storage size for Kafka broker autoscaling.</td>
+        <td>number</td>
+        <td>250</td>
+        <td>no</td>
+        <td>300</td>
+    </tr>
+    <tr>
+        <td>scaling_target_value</td>
+        <td>(Cluster type - Provisioned/Standard Broker node only) The Kafka broker storage utilization at which scaling is initiated.</td>
+        <td>number</td>
+        <td>70</td>
+        <td>no</td>
+        <td>50</td>
+    </tr>    
+    <tr>
+        <td>create_configuration</td>
+        <td>(Cluster type - Provisioned only) Determines whether to create a MSK Cluster configuration.</td>
+        <td>bool</td>
+        <td>true</td>
+        <td>no</td>
+        <td>false</td>
+    </tr>
+    <tr>
+        <td>configuration_arn</td>
+        <td>(Cluster type - Provisioned only) ARN of an externally created configuration to use.</td>
+        <td>string</td>
+        <td>null</td>
+        <td>no</td>
+        <td>"arn:aws:kafka:ap-northeast-2:370166107047:configuration/dev-an2d-platform-mskcfg/11112222-3333-4444-5555-666677778888-1"</td>
+    </tr>
+    <tr>
+        <td>configuration_name</td>
+        <td>(Cluster type - Provisioned only) Specify cluster configuration name.</td>
+        <td>string</td>
+        <td>null</td>
+        <td>no</td>
+        <td>"my-msk-config"</td>
+    </tr>
+    <tr>
+        <td>configuration_revision</td>
+        <td>(Cluster type - Provisioned only) Revision of the externally created configuration to use.</td>
+        <td>number</td>
+        <td>null</td>
+        <td>no</td>
+        <td>2</td>
+    </tr>
+    <tr>
+        <td>configuration_description</td>
+        <td>(Cluster type - Provisioned only) Description of the configuration.</td>
+        <td>string</td>
+        <td>null</td>
+        <td>no</td>
+        <td>"This Configuration is for my-msk-cluster"</td>
+    </tr>
+    <tr>
+        <td>configuration_kafka_versions</td>
+        <td>(Cluster type - Provisioned only) Support Kafka version.</td>
+        <td>list(string)</td>
+        <td>null</td>
+        <td>no</td>
+        <td>["3.6.0"]</td>
+    </tr>
+    <tr>
+        <td>configuration_server_properties</td>
+        <td>(Cluster type - Provisioned only) Contents of the server.properties file.</td>
+        <td>map(string)</td>
+        <td>{}</td>
+        <td>no</td>
+        <td>Supported properties are documented in the <a href="https://docs.aws.amazon.com/msk/latest/developerguide/msk-configuration-properties.html">MSK Developer Guide</a></td>
+    </tr>    
+    <tr>
         <td>enable_client_noauth</td>
-        <td>Allow or not client access without authentication.</td>
+        <td>Allow or not client access(consume or produce...) to MSK broker nodes without authentication.</td>
         <td>bool</td>
         <td>false</td>
         <td>no</td>
@@ -195,7 +239,7 @@ The main resources provisioned through the `tfmodule-aws-msk` are described belo
     </tr>
     <tr>
         <td>enable_client_auth_iam</td>
-        <td>SASL/IAM authentication is enabled or not.</td>
+        <td>SASL/IAM authentication is enabled or not client to access(consume or produce...) to MSK broker nodes. If enabled, the access is controlled by AWS IAM attached to client(Services or Applications)</td>
         <td>bool</td>
         <td>false</td>
         <td>no</td>
@@ -203,7 +247,7 @@ The main resources provisioned through the `tfmodule-aws-msk` are described belo
     </tr>
     <tr>
         <td>enable_client_auth_scram</td>
-        <td>SASL/SCRAM authentication is enabled or not.</td>
+        <td>SASL/SCRAM authentication is enabled or not client to access(consume or produce...) to MSK broker nodes. If enabled, the access is controlled by login(id/pw). It can be integrated with AWS Secrets Manager</td>
         <td>bool</td>
         <td>false</td>
         <td>no</td>
@@ -211,31 +255,15 @@ The main resources provisioned through the `tfmodule-aws-msk` are described belo
     </tr>
     <tr>
         <td>client_auth_cert_authority_arns</td>
-        <td>List of AWS Private CA Amazon Resource Name (ARN)s. If listed, client checks broker's certificates.</td>
+        <td>List of AWS Private CA Amazon Resource Name (ARN)s. If listed, broker checks client's certificates (Mutual TLS)</td>
         <td>list(string)</td>
         <td>null</td>
         <td>no</td>
         <td>["arn:aws:acm:ap-northeast-2:111122223333:certificate/a1b2c3d4-a1b2-c3d4-e5f6-112233445566"]</td>
     </tr>
     <tr>
-        <td>cluster_name</td>
-        <td>Name of the MSK cluster.</td>
-        <td>string</td>
-        <td></td>
-        <td>yes</td>
-        <td>"my-cluster"</td>
-    </tr>
-    <tr>
-        <td>cluster_fullname</td>
-        <td>Fullname of the MSK cluster.</td>
-        <td>string</td>
-        <td></td>
-        <td>yes</td>
-        <td>"my-cluster-full-name"</td>
-    </tr>
-    <tr>
         <td>encryption_at_rest_kms_key_arn</td>
-        <td>You may specify a KMS key short ID or ARN (it will always output an ARN) to use for encrypting your data at rest. If no key is specified, an AWS managed KMS ('aws/msk' managed service) key will be used for encrypting the data at rest</td>
+        <td>Specify a KMS key short ID or ARN (it will always output an ARN) to use for encrypting stored data in MSK broker node storages. If no key is specified, an AWS managed KMS ('aws/msk' managed service) key will be used for encrypting the data at rest</td>
         <td>string</td>
         <td>null</td>
         <td>no</td>
@@ -243,11 +271,11 @@ The main resources provisioned through the `tfmodule-aws-msk` are described belo
     </tr>
     <tr>
         <td>encryption_in_transit_client_broker</td>
-        <td>Encryption setting for data in transit between clients and brokers.</td>
+        <td>Encryption setting for data in transit between clients and brokers. Valid values: TLS, TLS_PLAINTEXT, and PLAINTEXT. If set "TLS", The broker only accepts TLS encrypted transit. If set "TLS_PLAINTEXT", The broker acce]pts both TLS encrypted and plain transit. If set "PLAINTEXT", The broker only accepts plain transit.</td>
         <td>string</td>
         <td>"TLS"</td>
         <td>no</td>
-        <td>"TLS", "TLS_PLAINTEXT", and "PLAINTEXT"</td>
+        <td>"TLS_PLAINTEXT"</td>
     </tr>
     <tr>
         <td>encryption_in_transit_in_cluster</td>
@@ -256,206 +284,6 @@ The main resources provisioned through the `tfmodule-aws-msk` are described belo
         <td>true</td>
         <td>no</td>
         <td>false</td>
-    </tr>
-    <tr>
-        <td>enhanced_monitoring</td>
-        <td>Specify the desired enhanced MSK CloudWatch monitoring level.</td>
-        <td>string</td>
-        <td>null</td>
-        <td>no</td>
-        <td>Available options are "DEFAULT" | "PER_BROKER" | "PER_TOPIC_PER_BROKER" | "PER_TOPIC_PER_PARTITION". See <a href="https://docs.aws.amazon.com/msk/latest/developerguide/monitoring.html">Monitoring Amazon MSK with Amazon CloudWatch</a></td>
-    </tr>
-    <tr>
-        <td>kafka_version</td>
-        <td>Specify the desired Kafka software version.</td>
-        <td>string</td>
-        <td>null</td>
-        <td>no</td>
-        <td>"3.6.0"</td>
-    </tr>
-    <tr>
-        <td>cloudwatch_log_group_tags</td>
-        <td>A map of additional tags to add to the cloudwatch log group created.</td>
-        <td>map(string)</td>
-        <td>null</td>
-        <td>no</td>
-        <td>{Name = "My-Cloudwatch-Loggroup", Onwer = "Me"}</td>
-    </tr>
-    <tr>
-        <td>cloudwatch_log_group_class</td>
-        <td>Specifies the log class of the log group.</td>
-        <td>string</td>
-        <td>null</td>
-        <td>no</td>
-        <td>Possible values are: "STANDARD" or "INFREQUENT_ACCESS".</td>
-    </tr>
-    <tr>
-        <td>cloudwatch_logs_enabled</td>
-        <td>Indicates whether you want to enable or disable streaming broker logs to Cloudwatch Logs.</td>
-        <td>bool</td>
-        <td>true</td>
-        <td>no</td>
-        <td>false</td>
-    </tr>
-    <tr>
-        <td>firehose_logs_enabled</td>
-        <td>Indicates whether you want to enable or disable streaming broker logs to Kinesis Data Firehose.</td>
-        <td>bool</td>
-        <td>false</td>
-        <td>no</td>
-        <td>true</td>
-    </tr>
-    <tr>
-        <td>firehose_delivery_stream</td>
-        <td>Name of the Kinesis Data Firehose delivery stream to deliver logs to.</td>
-        <td>string</td>
-        <td>null</td>
-        <td>no</td>
-        <td>"my-kinesis-stream"</td>
-    </tr>
-    <tr>
-        <td>s3_logs_enabled</td>
-        <td>Indicates whether you want to enable or disable streaming broker logs to S3.</td>
-        <td>bool</td>
-        <td>false</td>
-        <td>no</td>
-        <td>true</td>
-    </tr>
-    <tr>
-        <td>s3_logs_bucket</td>
-        <td>Name of the S3 bucket to deliver logs to.</td>
-        <td>string</td>
-        <td>false</td>
-        <td>no</td>
-        <td>"my-s3-bucket"</td>
-    </tr>
-    <tr>
-        <td>s3_logs_prefix</td>
-        <td>Prefix to append to the folder name.</td>
-        <td>string</td>
-        <td>false</td>
-        <td>no</td>
-        <td>"msk-cluster/my-cluster/logs"</td>
-    </tr>
-    <tr>
-        <td>number_of_broker_nodes</td>
-        <td>The desired total number of broker nodes in the kafka cluster. It must be a multiple of the number of specified client subnets.</td>
-        <td>number</td>
-        <td>null</td>
-        <td>no</td>
-        <td>1</td>
-    </tr>
-    <tr>
-        <td>jmx_exporter_enabled</td>
-        <td>Indicates whether you want to enable or disable the JMX Exporter.</td>
-        <td>bool</td>
-        <td>false</td>
-        <td>no</td>
-        <td>true</td>
-    </tr>
-    <tr>
-        <td>node_exporter_enabled</td>
-        <td>Indicates whether you want to enable or disable the Node Exporter.</td>
-        <td>bool</td>
-        <td>false</td>
-        <td>no</td>
-        <td>true</td>
-    </tr>
-    <tr>
-        <td>storage_mode</td>
-        <td>Controls storage mode for supported storage tiers.</td>
-        <td>string</td>
-        <td>"LOCAL"</td>
-        <td>no</td>
-        <td>"LOCAL" or "TIERED"</td>
-    </tr>
-    <tr>
-        <td>enable_vpc_connectivity</td>
-        <td>Whether to use multiple VPC Connection. See <a href="https://docs.aws.amazon.com/msk/latest/developerguide/aws-access-mult-vpc.html">document</a></td>
-        <td>bool</td>
-        <td>false</td>
-        <td>no</td>
-        <td>true</td>
-    </tr>
-    <tr>
-        <td>vpc_connectivity_auth_tls</td>
-        <td>Enables TLS authentication for VPC connectivity.</td>
-        <td>bool</td>
-        <td>false</td>
-        <td>no</td>
-        <td>true</td>
-    </tr>
-    <tr>
-        <td>vpc_connectivity_auth_iam</td>
-        <td>Enables SASL/IAM authentication for VPC connectivity.</td>
-        <td>bool</td>
-        <td>false</td>
-        <td>no</td>
-        <td>true</td>
-    </tr>
-    <tr>
-        <td>vpc_connectivity_auth_scram</td>
-        <td>Enables SASL/SCRAM authentication for VPC connectivity.</td>
-        <td>bool</td>
-        <td>false</td>
-        <td>no</td>
-        <td>true</td>
-    </tr>
-    <tr>
-        <td>create_configuration</td>
-        <td>Determines whether to create a configuration.</td>
-        <td>bool</td>
-        <td>true</td>
-        <td>no</td>
-        <td>false</td>
-    </tr>
-    <tr>
-        <td>configuration_arn</td>
-        <td>ARN of an externally created configuration to use.</td>
-        <td>string</td>
-        <td>null</td>
-        <td>no</td>
-        <td>"arn:aws:kafka:ap-northeast-2:370166107047:configuration/dev-an2d-platform-mskcfg/11112222-3333-4444-5555-666677778888-1"</td>
-    </tr>
-    <tr>
-        <td>configuration_name</td>
-        <td>Specify cluster configuration name.</td>
-        <td>string</td>
-        <td>null</td>
-        <td>no</td>
-        <td>"my-msk-config"</td>
-    </tr>
-    <tr>
-        <td>configuration_revision</td>
-        <td>Revision of the externally created configuration to use.</td>
-        <td>number</td>
-        <td>null</td>
-        <td>no</td>
-        <td>2</td>
-    </tr>
-    <tr>
-        <td>configuration_description</td>
-        <td>Description of the configuration.</td>
-        <td>string</td>
-        <td>null</td>
-        <td>no</td>
-        <td>"This Configuration is for my-msk-cluster"</td>
-    </tr>
-    <tr>
-        <td>configuration_kafka_versions</td>
-        <td>Support Kafka version.</td>
-        <td>list(string)</td>
-        <td>null</td>
-        <td>no</td>
-        <td>["3.6.0"]</td>
-    </tr>
-    <tr>
-        <td>configuration_server_properties</td>
-        <td>Contents of the server.properties file.</td>
-        <td>map(string)</td>
-        <td>{}</td>
-        <td>no</td>
-        <td>Supported properties are documented in the <a href="https://docs.aws.amazon.com/msk/latest/developerguide/msk-configuration-properties.html">MSK Developer Guide</a></td>
     </tr>
     <tr>
         <td>create_scram_secret_association</td>
@@ -472,6 +300,126 @@ The main resources provisioned through the `tfmodule-aws-msk` are described belo
         <td>[]</td>
         <td>no</td>
         <td>["arn:aws:secretsmanager:ap-northeast-2:111122223333:secret:mysecret-1", "arn:aws:secretsmanager:ap-northeast-2:111122223333:secret:mysecret-2"]</td>
+    </tr>
+    <tr>
+        <td>storage_mode</td>
+        <td>Controls storage mode for supported storage tiers. For Standard type of broker, tiered storage transfer old data to low-cost storage. Available values : "LOCAL" or "TIERED". See <a href="https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/msk-tiered-storage.html">MSK Tiered storage for Standard broker</a> for more details.</td>
+        <td>string</td>
+        <td>"LOCAL"</td>
+        <td>no</td>
+        <td>"TIERED"</td>
+    </tr>
+    <tr>
+        <td>enable_vpc_connectivity</td>
+        <td>Whether to use multiple VPC Connection. To access the MSK Cluster from client assosiated with another VPC, VPC Connectivity must be enabled. See <a href="https://docs.aws.amazon.com/msk/latest/developerguide/aws-access-mult-vpc.html">document</a> for more details.</td>
+        <td>bool</td>
+        <td>false</td>
+        <td>no</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>vpc_connectivity_auth_tls</td>
+        <td>Enables TLS authentication for VPC connectivity. IF enabled, broker checks client's certificates (Mutual TLS) accessing from another VPC.</td>
+        <td>bool</td>
+        <td>false</td>
+        <td>no</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>vpc_connectivity_auth_iam</td>
+        <td>SASL/IAM authentication is enabled or not client to access(consume or produce...) from anther VPC to MSK broker nodes. If enabled, the access is controlled by AWS IAM attached to client(Services or Applications)</td>
+        <td>bool</td>
+        <td>false</td>
+        <td>no</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>vpc_connectivity_auth_scram</td>
+        <td>SASL/SCRAM authentication is enabled or not client to access(consume or produce...) from anther VPC to MSK broker nodes. If enabled, the access is controlled by login(id/pw). It can be integrated with AWS Secrets Manager.</td>
+        <td>bool</td>
+        <td>false</td>
+        <td>no</td>
+        <td>true</td>
+    </tr>    
+    <tr>
+        <td>enhanced_monitoring</td>
+        <td>Specify the desired enhanced MSK CloudWatch monitoring level. It can set details of MSK cluster and brokers metrics. Available options are "DEFAULT" | "PER_BROKER" | "PER_TOPIC_PER_BROKER" | "PER_TOPIC_PER_PARTITION". See <a href="https://docs.aws.amazon.com/msk/latest/developerguide/monitoring.html">Monitoring Amazon MSK with Amazon CloudWatch.</a></td>
+        <td>string</td>
+        <td>null</td>
+        <td>no</td>
+        <td>"PER_BROKER"</td>
+    </tr>
+    <tr>
+        <td>cloudwatch_logs_enabled</td>
+        <td>Indicates whether you want to enable or disable streaming broker logs to Cloudwatch Logs.</td>
+        <td>bool</td>
+        <td>true</td>
+        <td>no</td>
+        <td>false</td>
+    </tr>    
+    <tr>
+        <td>cloudwatch_log_group_class</td>
+        <td>Specifies the log class of the log group. Possible values are: "STANDARD" or "INFREQUENT_ACCESS".</td>
+        <td>string</td>
+        <td>null</td>
+        <td>no</td>
+        <td>"STANDARD"</td>
+    </tr>
+    <tr>
+        <td>firehose_logs_enabled</td>
+        <td>Indicates whether you want to enable or disable streaming MSK Broker node logs to Kinesis Data Firehose.</td>
+        <td>bool</td>
+        <td>false</td>
+        <td>no</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>firehose_delivery_stream</td>
+        <td>Name of the Kinesis Data Firehose delivery stream to deliver MSK Broker node logs to.</td>
+        <td>string</td>
+        <td>null</td>
+        <td>no</td>
+        <td>"my-kinesis-stream"</td>
+    </tr>
+    <tr>
+        <td>s3_logs_enabled</td>
+        <td>Indicates whether you want to enable or disable streaming MSK Broker node logs to S3.</td>
+        <td>bool</td>
+        <td>false</td>
+        <td>no</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>s3_logs_bucket</td>
+        <td>Name of the S3 bucket to deliver MSK Broker node logs to.</td>
+        <td>string</td>
+        <td>false</td>
+        <td>no</td>
+        <td>"my-s3-bucket"</td>
+    </tr>
+    <tr>
+        <td>s3_logs_prefix</td>
+        <td>Prefix to append to the bucket object name for MSK Broker node logs.</td>
+        <td>string</td>
+        <td>false</td>
+        <td>no</td>
+        <td>"msk-cluster/my-cluster/logs"</td>
+    </tr>
+    <tr>
+        <td>jmx_exporter_enabled</td>
+        <td>Indicates whether you want to enable or disable the JMX Exporter for Prometheus.</td>
+        <td>bool</td>
+        <td>false</td>
+        <td>no</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>node_exporter_enabled</td>
+        <td>Indicates whether you want to enable or disable the Node Exporter for Prometheus.</td>
+        <td>bool</td>
+        <td>false</td>
+        <td>no</td>
+        <td>true</td>
     </tr>
     <tr>
         <td>create_cloudwatch_log_group</td>
@@ -505,44 +453,609 @@ The main resources provisioned through the `tfmodule-aws-msk` are described belo
         <td>no</td>
         <td>"11112222-aabb-3344-ccdd-55667788abcd"</td>
     </tr>
-    <tr>
-        <td>enable_storage_autoscaling</td>
-        <td>Determines whether autoscaling is enabled for storage.</td>
-        <td>bool</td>
-        <td>false</td>
-        <td>no</td>
-        <td>true</td>
-    </tr>
-    <tr>
-        <td>scaling_max_size</td>
-        <td>Max storage size for Kafka broker autoscaling.</td>
-        <td>number</td>
-        <td>250</td>
-        <td>no</td>
-        <td>300</td>
-    </tr>
-    <tr>
-        <td>scaling_target_value</td>
-        <td>The Kafka broker storage utilization at which scaling is initiated.</td>
-        <td>number</td>
-        <td>70</td>
-        <td>no</td>
-        <td>50</td>
-    </tr>
 </tbody>
 </table>
 
 ### Output Variables
-TODO :: 여기에 Output 변수 테이블이 구성 됩니다.
 
-## Hands-On
-TODO :: 여기에 아래와 같은 클러스터 생성에 관한 코드가 구성 됩니다.
- - Provisioned-Standard
-    기본 구성 방법 및 테스트 방법
-    Autoscaling 구성 방법 및 테스트 방법
-    Tiered Storage 및 테스트 방법
- - Provisioned-Express
-    기본 구성 방법 및 테스트 방법
- - 모니터링 레벨 설정 및 로그 통합 방법 및 테스트 방법
- - Serverless
-   기본 구성 방법 및 테스트 방법
+<table>
+<thead>
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Type</th> 
+        <th>Example</th>
+    </tr>
+</thead>
+<tbody>
+    <tr>
+        <td>arn</td>
+        <td>Amazon Resource Name (ARN) of the MSK cluster.</td>
+        <td>string</td>
+        <td>"arn:aws:kafka:us-east-1:111122223333:cluster/demomsk/11112222-3344-5566-7788-152f5289c6dd-14"</td>
+    </tr>
+    <tr>
+        <td>cluster_name</td>
+        <td>Name of the MSK cluster</td>
+        <td>string</td>
+        <td>"my-msk-cluster"</td>
+    </tr>
+    <tr>
+        <td>cluster_uuid</td>
+        <td>UUID of the MSK cluster, for use in IAM policies</td>
+        <td>string</td>
+        <td>"11112222-3344-5566-7788-152f5289c6dd-14"</td>
+    </tr>    
+    <tr>
+        <td>bootstrap_brokers_plaintext</td>
+        <td>Comma separated list of one or more hostname:port pairs of kafka brokers suitable to bootstrap connectivity to the kafka cluster. Contains a value if encryption_in_transit_client_broker is set to PLAINTEXT or TLS_PLAINTEXT.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9092","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9092"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_sasl_iam</td>
+        <td>One or more DNS names (or IP addresses) and SASL IAM port pairs. This attribute will have a value if encryption_in_transit_client_broker is set to TLS_PLAINTEXT or TLS and client_authentication_sasl_iam is set to true.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9098","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9098"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_sasl_scram</td>
+        <td>One or more DNS names (or IP addresses) and SASL SCRAM port pairs. This attribute will have a value if encryption_in_transit_client_broker is set to TLS_PLAINTEXT or TLS and `client_authentication_sasl_scram` is set to true.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9096","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9096"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_tls</td>
+        <td>One or more DNS names (or IP addresses) and TLS port pairs. This attribute will have a value if encryption_in_transit_client_broker is set to TLS_PLAINTEXT or TLS.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9094","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9094"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers</td>
+        <td>Comma separated list of one or more hostname:port pairs of kafka brokers suitable to bootstrap connectivity to the kafka cluster.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9092","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9098"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_authentication</td>
+        <td>Name string of brokers authentication for client. SASL_IAM for IAM, SASL_SCRAM for SASL/SCRAM, TLS for mutual TLS.</td>
+        <td>string</td>
+        <td>"SASL_IAM"</td>
+    </tr>
+    <tr>
+        <td>zookeeper_connect_string</td>
+        <td>A comma separated list of one or more hostname:port pairs to use to connect to the Apache Zookeeper cluster. The returned values are sorted alphabetically.</td>
+        <td>list(string)</td>
+        <td>["z-3.demomsk.aabbcc.c14.kafka.us-east-1.amazonaws.com:2181","z-1.demomsk.11aabb.c14.kafka.us-east-1.amazonaws.com":2181,"z-2.demomsk.abcd1234.c14.kafka.us-east-1.amazonaws.com:2181"]</td>
+    </tr>
+    <tr>
+        <td>zookeeper_connect_string_tls</td>
+        <td>A comma separated list of one or more hostname:port pairs to use to connect to the Apache Zookeeper cluster via TLS. The returned values are sorted alphabetically.</td>
+        <td>list(string)</td>
+        <td>["z-3.demomsk.aabbcc.c14.kafka.us-east-1.amazonaws.com:2182","z-1.demomsk.11aabb.c14.kafka.us-east-1.amazonaws.com":2182,"z-2.demomsk.abcd1234.c14.kafka.us-east-1.amazonaws.com:2182"]</td>
+    </tr>
+    <tr>
+        <td>configuration_arn</td>
+        <td>Amazon Resource Name (ARN) of the MSK Cluster configuration.</td>
+        <td>string</td>
+        <td>"arn:aws:kafka:us-east-1:111122223333:configuration/demomskcfg/1234abcd-1111-2222-33aa-aaaabbbbcccc-14"</td>
+    </tr>
+    <tr>
+        <td>configuration_latest_revision</td>
+        <td>Latest revision of the MSK Cluster configuration.</td>
+        <td>string</td>
+        <td>"7"</td>
+    </tr>
+    <tr>
+        <td>scram_secret_association_id</td>
+        <td>The ID of the MSK SCRAM secret association.</td>
+        <td>string</td>
+        <td>"arn:aws:kafka:us-east-1:111122223333:cluster/demomsk/abcd1234-abcd-5678-abcd-1234abcd5678-1/scram-secret-association/efgh5678-ijkl-9012-mnop-3456qrst7890"</td>
+    </tr>
+    <tr>
+        <td>log_group_arn</td>
+        <td>The Amazon Resource Name (ARN) specifying the Cloudwatch log group.</td>
+        <td>string</td>
+        <td>"arn:aws:logs:us-east-1:410362304746:log-group:/msk/demomsk"</td>
+    </tr>
+    <tr>
+        <td>appautoscaling_policy_arn</td>
+        <td>The ARN assigned by AWS to the scaling policy.</td>
+        <td>string</td>
+        <td>"arn:aws:autoscaling:us-east-1:111122223333:scalingPolicy:11112222-3333-aabb-4444-555566667777:resource/msk/default/demomsk:pplocyName/my-as-policy-name"</td>
+    </tr>
+    <tr>
+        <td>appautoscaling_policy_name</td>
+        <td>The scaling policy's name.</td>
+        <td>string</td>
+        <td>"my-as-policy-name"</td>
+    </tr>
+</tbody>
+</table>
+
+## Usage
+
+예제를 통해 리소스 프로비저닝 및 테스트 방법을 설명 합니다.
+
+### Prepare
+
+TODO :: 스크립트가 먼저 준비 된 후 클러스터 프로비저닝 코드를 보여줄지.. 반대로 할지.. 결정 필요
+MSK Cluster를 프로비저닝 한 후 테스트를 하기 위해 kafka-script를 준비해야 합니다.
+
+먼저 테스트를 위한 클라이언트 머신에 Java를 설치 합니다.
+
+```sh
+sudo yum -y install java-11
+```
+
+그 다음, Apache Kafka에서 제공하는 Cluster 관리용 스크립트를 다운로드 합니다. {YOUR MSK VERSION} 에는 프로비저닝 한 MSK Cluster의 Kafka 버전을 기입 합니다.
+
+```sh
+wget https://archive.apache.org/dist/kafka/{YOUR MSK VERSION}/kafka_2.13-{YOUR MSK VERSION}.tgz
+```
+
+예를 들어 Amazon MSK를 Apache Kafka 버전이 3.6.0인 경우 다음 명령을 실행합니다.
+
+```sh
+wget https://archive.apache.org/dist/kafka/3.6.0/kafka_2.13-3.6.0.tgz
+```
+
+다운로드 한 TAR 압축 파일을 압축해제 합니다. 명령어는 다운로드 한 디렉토리에서 수행 합니다.
+
+```sh
+tar -xzf kafka_2.13-{YOUR MSK VERSION}.tgz
+```
+
+kafka_2.13-{YOUR MSK VERSION}/config 디렉토리로 이동하여 연결에 사용 할 인증정보가 담긴 client.properties 를 생성 합니다.
+
+```sh
+cd kafka_2.13-{YOUR MSK VERSION}/config
+touch client.properties
+```
+
+client.properties 파일의 내용은 아래와 같이 클라이언트 인증 방식에 따라서 작성 합니다.
+
+#### 클라이언트 인증 방식이 NOAUTH 인 경우 (enable_client_noauth == true)
+
+- 클라이언트와 브로커가 암호화 되지 않은 통신을 하는 경우 security.protocol=PLAINTEXT로 설정 해주세요.
+
+```sh
+security.protocol=SASL_SSL
+```
+
+#### 클라이언트 인증 방식이 SASL/IAM 인 경우 (enable_client_auth_iam == true)
+
+- 먼저 kafka_2.13-{YOUR MSK VERSION}/libs 디렉터리로 이동하고 다음 명령을 실행하여 Amazon MSK IAM JAR 파일을 다운로드합니다.
+
+```sh
+cd kafka_2.13-{YOUR MSK VERSION}/libs
+wget https://github.com/aws/aws-msk-iam-auth/releases/download/v2.3.0/aws-msk-iam-auth-2.3.0-all.jar
+```
+
+- 그 다음 client.properties 파일에 내용을 기입 합니다.
+- 클라이언트와 브로커가 암호화 되지 않은 통신을 하는 경우 security.protocol=PLAINTEXT로 설정 해주세요.
+
+```sh
+security.protocol=SASL_SSL
+sasl.mechanism=AWS_MSK_IAM
+sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;
+sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
+```
+
+#### 클라이언트 인증 방식이 SASL/SCRAM 인 경우 (enable_client_auth_scram == true)
+
+- 클라이언트와 브로커가 암호화 되지 않은 통신을 하는 경우 security.protocol=PLAINTEXT로 설정 해주세요.
+
+```sh
+security.protocol=SASL_SSL
+sasl.mechanism=SCRAM-SHA-512
+sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required username="{USERNAME}" password="{PASSWORD}";
+```
+
+마지막으로 아래와 같은 명령어를 통해 정상적으로 클러스터에 접근하여 토픽 리스트를 가져올 수 있는지 확인 합니다.
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-topics.sh --list \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --command-config kafka_2.13-{YOUR MSK VERSION}/config/client.properties
+```
+
+결과 예시는 아래와 같습니다.
+
+```sh
+MSKTutorialTopic
+TestTopic
+__amazon_msk_canary
+__consumer_offsets
+```
+
+<br>
+
+### Example 1 : Provisioned MSK Cluster - Standard Type Broker
+
+Provisioned 타입의 MSK Cluster에서 Standard 타입의 브로커 노드를 프로비저닝 및 테스트 하는 방법을 설명 합니다.
+
+#### How to provision
+
+Standard 타입의 브로커 노드는 아래와 같이 구성 합니다. 브로커에서 사용하는 클라이언트 인증 방식은 SASL/IAM 입니다.
+
+```hcl
+module "ctx" {
+  source = "git::https://github.com/oniops/tfmodule-context.git?ref=v1.3.2"
+  context = {
+    project     = "demo"
+    region      = "ap-northeast-2"
+    environment = "Development"
+    department  = "DevOps"
+    owner       = "my_devops_team@example.com"
+    customer    = "Example Customer"
+    domain      = "example.com"
+    pri_domain  = "example.internal"
+  }
+}
+
+locals {
+  cluster_name = "my-msk-cluster"
+}
+
+resource "aws_security_group" "this" {
+  name        = "${local.cluster_name}"
+  description = "MSK Cluster"
+  vpc_id      = "my-vpc-id" # MSK Cluster가 배치될 VPC ID를 입력 합니다.
+}
+
+resource "aws_security_group_rule" "client" {
+  type              = "ingress"
+  description       = "Client to MSK Cluster broker node"
+  protocol          = "tcp"
+  security_group_id = aws_security_group.this.id
+  cidr_blocks       = ["0.0.0.0/0"] # 클라이언트 IP 특정이 가능 한 경우 해당 IP로 대치 합니다.
+  from_port         = 9098
+  to_port           = 9098
+}
+
+module "msk" {
+  source                 = "git::https://github.com/oniops/tfmodule-msk.git?ref=v1.0.0"
+  context                = module.ctx.context
+  cluster_name           = local.cluster_name
+  enable_client_auth_iam = true
+  kafka_version          = "3.6.0"
+  instance_type          = "kafka.t3.small"
+  number_of_broker_nodes = 2
+  client_subnets         = ["client-subnet-id-1", "client-subnet-id-2"] # MSK Cluster가 배치될 서브넷 ID를 입력 합니다.
+  ebs_volume_size        = 1000
+  security_groups        = [aws_security_group.this.id]
+  tags                   = module.ctx.tags
+}
+
+# MSK 클러스터 생성이 완료되면 클러스터의 브로커 Endpoint가 출력 됩니다.
+output "endpoints" {
+  value = module.msk.bootstrap_brokers
+}
+```
+
+<br>
+
+#### How to Test
+
+TODO :: 프로비저닝 후 테스트하는 방법은 모두 같은데 이걸 각 Hands-On 별로 두는게 맞을까?
+
+- 프로비저닝이 완료되면 아래와 같이 토픽의 생성과 Produce, 그리고 Consume을 테스트할 수 있습니다.
+- MSK 클러스터 생성이 완료되면 출력되는 클러스터의 브로커 Endpoint를 사용하여 연결 합니다.
+
+먼저 아래의 명령어로 토픽을 생성 합니다.
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-topics.sh --create \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --command-config kafka_2.13-{YOUR MSK VERSION}/config/client.properties
+    --replication-factor 2 \
+    --partitions 1 \
+    --topic "example-topic"
+```
+
+토픽이 생성되면 아래와 같이 출력 됩니다.
+
+```sh
+Created example-topic
+```
+
+다음으로, 아래의 명령어로 생성된 토픽에 메세지를 Produce 합니다.
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-console-producer.sh \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --producer.config kafka_2.13-{YOUR MSK VERSION}/config/client.properties \
+    --topic "example-topic"
+```
+
+스크립트 실행 후 아래와 같이 CLI에 Produce 할 메세지를 입력 합니다. 메세지 Produce가 끝나면 ctrl+c 를 입력하여 스크립트를 종료 합니다.
+
+```sh
+>example-msg-1
+>example-msg-2
+>^C
+```
+
+아래의 명령어를 이용하여 생성된 토픽에 Produce한 메세지를 Consume 합니다.
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-console-consumer.sh \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --consumer.config kafka_2.13-{YOUR MSK VERSION}/config/client.properties \
+    --offset latest \
+    --topic "example-topic"
+```
+
+스크립트 실행 후 아래와 같이 CLI에 Produce 하였던 메세지가 출력 됩니다. 메세지 Consume이 끝나면 ctrl+c 를 입력하여 스크립트를 종료 합니다.
+
+```sh
+example-msg-1
+example-msg-2
+^C
+```
+
+### Example 2 : Provisioned MSK Cluster - Express Type Broker
+
+Provisioned 타입의 MSK Cluster에서 Standard 타입의 브로커 노드를 프로비저닝 및 테스트 하는 방법을 설명 합니다. 지원하는 Express 타입의 브로커 노드에 대한 인스턴스 타입은 아래와 같습니다.
+
+- express.m7g.large
+- express.m7g.xlarge
+- express.m7g.2xlarge
+- express.m7g.4xlarge
+- express.m7g.8xlarge
+- express.m7g.12xlarge
+- express.m7g.16xlarge
+
+#### How to provision
+
+Express 타입의 브로커 노드는 아래와 같이 구성 합니다. 브로커에서 사용하는 클라이언트 인증 방식은 SASL/IAM 입니다. 
+
+```hcl
+module "ctx" {
+  source = "git::https://github.com/oniops/tfmodule-context.git?ref=v1.3.2"
+  context = {
+    project     = "demo"
+    region      = "ap-northeast-2"
+    environment = "Development"
+    department  = "DevOps"
+    owner       = "my_devops_team@example.com"
+    customer    = "Example Customer"
+    domain      = "example.com"
+    pri_domain  = "example.internal"
+  }
+}
+
+locals {
+  cluster_name = "my-msk-cluster"
+}
+
+resource "aws_security_group" "this" {
+  name        = "${local.cluster_name}"
+  description = "MSK Cluster"
+  vpc_id      = "my-vpc-id" # MSK Cluster가 배치될 VPC ID를 입력 합니다.
+}
+
+resource "aws_security_group_rule" "client" {
+  type              = "ingress"
+  description       = "Client to MSK Cluster broker node"
+  protocol          = "tcp"
+  security_group_id = aws_security_group.this.id
+  cidr_blocks       = ["0.0.0.0/0"] # 클라이언트 IP 특정이 가능 한 경우 해당 IP로 대치 합니다.
+  from_port         = 9098
+  to_port           = 9098
+}
+
+module "msk" {
+  source                 = "git::https://github.com/oniops/tfmodule-msk.git?ref=v1.0.0"
+  context                = module.ctx.context
+  cluster_name           = local.cluster_name
+  enable_client_auth_iam = true
+  kafka_version          = "3.6.0"
+  
+  # Express 타입의 브로커를 사용하기 위해 express.* 타입의 인스턴스를 사용 합니다.
+  instance_type          = "express.m7g.large"
+
+  # MSK Cluster가 배치될 서브넷 ID를 입력 합니다. Express 타입의 브로커 노드는 최소 3개의 가용영역에 배치되어야 합니다.  
+  client_subnets         = ["client-subnet-id-1", "client-subnet-id-2" "client-subnet-id-3"] 
+  number_of_broker_nodes = 3
+
+  ebs_volume_size        = 1000
+  security_groups        = [aws_security_group.this.id]
+  tags                   = module.ctx.tags
+}
+
+# MSK 클러스터 생성이 완료되면 클러스터의 브로커 Endpoint가 출력 됩니다.
+output "endpoints" {
+  value = module.msk.bootstrap_brokers
+}
+```
+
+
+<br>
+
+#### How to Test
+
+TODO :: 프로비저닝 후 테스트하는 방법은 모두 같은데 이걸 각 Hands-On 별로 두는게 맞을까?
+
+- 프로비저닝이 완료되면 아래와 같이 토픽의 생성과 Produce, 그리고 Consume을 테스트할 수 있습니다.
+- MSK 클러스터 생성이 완료되면 출력되는 클러스터의 브로커 Endpoint를 사용하여 연결 합니다.
+
+먼저 아래의 명령어로 토픽을 생성 합니다.
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-topics.sh --create \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --command-config kafka_2.13-{YOUR MSK VERSION}/config/client.properties
+    --replication-factor 2 \
+    --partitions 1 \
+    --topic "example-topic"
+```
+
+토픽이 생성되면 아래와 같이 출력 됩니다.
+
+```sh
+Created example-topic
+```
+
+다음으로, 아래의 명령어로 생성된 토픽에 메세지를 Produce 합니다.
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-console-producer.sh \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --producer.config kafka_2.13-{YOUR MSK VERSION}/config/client.properties \
+    --topic "example-topic"
+```
+
+스크립트 실행 후 아래와 같이 CLI에 Produce 할 메세지를 입력 합니다. 메세지 Produce가 끝나면 ctrl+c 를 입력하여 스크립트를 종료 합니다.
+
+```sh
+>example-msg-1
+>example-msg-2
+>^C
+```
+
+아래의 명령어를 이용하여 생성된 토픽에 Produce한 메세지를 Consume 합니다.
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-console-consumer.sh \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --consumer.config kafka_2.13-{YOUR MSK VERSION}/config/client.properties \
+    --offset latest \
+    --topic "example-topic"
+```
+
+스크립트 실행 후 아래와 같이 CLI에 Produce 하였던 메세지가 출력 됩니다. 메세지 Consume이 끝나면 ctrl+c 를 입력하여 스크립트를 종료 합니다.
+
+```sh
+example-msg-1
+example-msg-2
+^C
+```
+
+### Example 3 : Serverless MSK Cluster
+
+Serverless 타입의 MSK Cluster를 프로비저닝 및 테스트 하는 방법을 설명 합니다.
+
+#### How to provision
+
+Serverless 타입의 MSK Cluster는 아래와 같이 프로비저닝 합니다.
+
+```hcl
+module "ctx" {
+  source = "git::https://github.com/oniops/tfmodule-context.git?ref=v1.3.2"
+  context = {
+    project     = "demo"
+    region      = "ap-northeast-2"
+    environment = "Development"
+    department  = "DevOps"
+    owner       = "my_devops_team@example.com"
+    customer    = "Example Customer"
+    domain      = "example.com"
+    pri_domain  = "example.internal"
+  }
+}
+
+locals {
+  cluster_name = "my-msk-cluster"
+}
+
+resource "aws_security_group" "this" {
+  name        = "${local.cluster_name}"
+  description = "MSK Cluster"
+  vpc_id      = "my-vpc-id" # MSK Cluster가 배치될 VPC ID를 입력 합니다.
+}
+
+resource "aws_security_group_rule" "client" {
+  type              = "ingress"
+  description       = "Client to MSK Cluster broker node"
+  protocol          = "tcp"
+  security_group_id = aws_security_group.this.id
+  cidr_blocks       = ["0.0.0.0/0"] # 클라이언트 IP 특정이 가능 한 경우 해당 IP로 대치 합니다.
+  from_port         = 9098
+  to_port           = 9098
+}
+
+module "msk" {
+  source                 = "git::https://github.com/oniops/tfmodule-msk.git?ref=v1.0.0"
+  context                = module.ctx.context
+  cluster_name           = local.cluster_name
+  kafka_version          = "3.6.0" 
+
+  # Serverless 타입의 Cluster를 생성 합니다.
+  # Serverless는 브로커 노드에 대한 정보 (인스턴스 타입, 노드 개수, 스토리지 볼륨) 를 요구하지 않습니다.
+  enable_serverless_cluster = true 
+  
+  client_subnets         = ["client-subnet-id-1", "client-subnet-id-2"]
+  security_groups        = [aws_security_group.this.id]
+  enable_client_auth_iam = true
+  tags                   = module.ctx.tags
+}
+
+# MSK 클러스터 생성이 완료되면 클러스터의 브로커 Endpoint가 출력 됩니다.
+output "endpoints" {
+  value = module.msk.bootstrap_brokers
+}
+```
+
+#### How to Test
+
+TODO :: 프로비저닝 후 테스트하는 방법은 모두 같은데 이걸 각 Hands-On 별로 두는게 맞을까?
+
+- 프로비저닝이 완료되면 아래와 같이 토픽의 생성과 Produce, 그리고 Consume을 테스트할 수 있습니다.
+- MSK 클러스터 생성이 완료되면 출력되는 클러스터의 브로커 Endpoint를 사용하여 연결 합니다.
+
+먼저 아래의 명령어로 토픽을 생성 합니다.
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-topics.sh --create \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --command-config kafka_2.13-{YOUR MSK VERSION}/config/client.properties
+    --replication-factor 2 \
+    --partitions 1 \
+    --topic "example-topic"
+```
+
+토픽이 생성되면 아래와 같이 출력 됩니다.
+
+```sh
+Created example-topic
+```
+
+다음으로, 아래의 명령어로 생성된 토픽에 메세지를 Produce 합니다.
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-console-producer.sh \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --producer.config kafka_2.13-{YOUR MSK VERSION}/config/client.properties \
+    --topic "example-topic"
+```
+
+스크립트 실행 후 아래와 같이 CLI에 Produce 할 메세지를 입력 합니다. 메세지 Produce가 끝나면 ctrl+c 를 입력하여 스크립트를 종료 합니다.
+
+```sh
+>example-msg-1
+>example-msg-2
+>^C
+```
+
+아래의 명령어를 이용하여 생성된 토픽에 Produce한 메세지를 Consume 합니다.
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-console-consumer.sh \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --consumer.config kafka_2.13-{YOUR MSK VERSION}/config/client.properties \
+    --offset latest \
+    --topic "example-topic"
+```
+
+스크립트 실행 후 아래와 같이 CLI에 Produce 하였던 메세지가 출력 됩니다. 메세지 Consume이 끝나면 ctrl+c 를 입력하여 스크립트를 종료 합니다.
+
+```sh
+example-msg-1
+example-msg-2
+^C
+```
+
+# LICENSE
+Apache-2.0 Licensed. See [LICENSE](https://github.com/oniops/tfmodule-aws-msk/blob/main/LICENSE).

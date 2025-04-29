@@ -2,7 +2,7 @@ locals {
   project           = var.context.project
   account_id        = var.context.account_id
   name_prefix       = var.context.name_prefix
-  tags              = var.context.tags
+  tags              = merge(var.context.tags, var.additional_tags)
   is_broker_express = var.instance_type != null ? (split(".", var.instance_type)[0] == "express" ? true : false) : false
   cluster_name      = var.cluster_fullname != null ? var.cluster_fullname : "${local.name_prefix}-${var.cluster_name}-msk"
 }
@@ -36,7 +36,7 @@ resource "aws_msk_cluster" "this" {
           client_authentication {
             tls = var.vpc_connectivity_auth_tls
             sasl {
-              iam = var.vpc_connectivity_auth_iam
+              iam   = var.vpc_connectivity_auth_iam
               scram = var.vpc_connectivity_auth_scram
             }
           }
@@ -132,10 +132,10 @@ resource "aws_msk_cluster" "this" {
     ]
   }
 
-  tags = merge(local.tags,
-    var.cluster_tags, {
-      Name = local.cluster_name
-    })
+  tags = merge(
+    local.tags,
+    { Name = local.cluster_name }
+  )
 
   depends_on = [
     aws_cloudwatch_log_group.cwLog[0]
@@ -159,10 +159,10 @@ resource "aws_msk_serverless_cluster" "this" {
     }
   }
 
-  tags = merge(local.tags,
-    var.cluster_tags, {
-      Name = local.cluster_name
-    })
+  tags = merge(
+    local.tags,
+    { Name = local.cluster_name }
+  )
 
   depends_on = [
     aws_cloudwatch_log_group.cwLog[0]
@@ -176,12 +176,10 @@ resource "aws_msk_serverless_cluster" "this" {
 resource "aws_msk_configuration" "this" {
   count = var.create && var.create_configuration ? 1 : 0
 
-  name = var.configuration_name != null ? var.configuration_name : "${local.name_prefix}-${var.cluster_name}-mskcfg"
+  name           = var.configuration_name != null ? var.configuration_name : "${local.name_prefix}-${var.cluster_name}-mskcfg"
   description    = var.configuration_description
   kafka_versions = var.configuration_kafka_versions
-  server_properties = join("\n", [
-    for k, v in var.configuration_server_properties : "${k} = ${v}"
-  ])
+  server_properties = join("\n", [for k, v in var.configuration_server_properties : "${k} = ${v}"])
 
   lifecycle {
     create_before_destroy = true
@@ -219,7 +217,8 @@ resource "aws_appautoscaling_target" "this" {
   scalable_dimension = "kafka:broker-storage:VolumeSize"
   service_namespace  = "kafka"
 
-  tags = var.tags
+  tags = local.tags
+
 }
 
 resource "aws_appautoscaling_policy" "this" {

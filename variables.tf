@@ -29,11 +29,12 @@ variable "tags" {
   default = {}
 }
 
-variable "cluster_tags" {
-  description = "A map of additional tags to add to the cluster"
+variable "additional_tags" {
+  description = "Specify additional tags for resources created in this module"
   type = map(string)
   default = {}
 }
+
 
 ################################################################################
 # Cluster
@@ -152,12 +153,6 @@ variable "kafka_version" {
   description = "Specify the desired Kafka software version"
   type        = string
   default     = null
-}
-
-variable "cloudwatch_log_group_tags" {
-  description = "A map of additional tags to add to the cloudwatch log group created"
-  type = map(string)
-  default = {}
 }
 
 variable "cloudwatch_log_group_class" {
