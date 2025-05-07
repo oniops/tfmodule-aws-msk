@@ -258,7 +258,7 @@ output "endpoints" {
 
 This chapter describes Input/Output variables using in tfmodule-aws-msk.
 
-### [Input Variables](./readme-input-variables.html)
+### [Input Variables](https://oniops.github.io/tfmodule-aws-msk/docs/readme-input-variables.html)
 
 <table>
 <thead>
