@@ -34,7 +34,7 @@ module "ctx" {
 }
 
 module "connection" {
-  source             = "git::https://github.com/oniops/tfmodule-msk.git//managed-vpc-connection?ref=v1.0.0"
+  source             = "git::https://github.com/oniops/tfmodule-aws-msk.git//module/managed-vpc-connection?ref=v1.0.0"
   context            = var.context
   target_cluster_arn = "arn:aws:kafka:ap-northeast-2:123456789012:cluster/my-msk-cluster/abc12d3e-1234-5678-9012-95de01ee639c-s1"
   authentication     = "SASL_IAM"                   # Enter the authentication method that the MSK Cluster uses for clients accessing from other VPCs.

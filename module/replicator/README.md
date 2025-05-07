@@ -74,7 +74,7 @@ resource "aws_security_group_rule" "target" {
 }
 
 module "replicator" {
-  source          = "git::https://github.com/oniops/tfmodule-msk.git/module/replicator?ref=v1.0.0"
+  source          = "git::https://github.com/oniops/tfmodule-aws-msk.git//module/replicator?ref=v1.0.0"
   context         = var.context
   replicator_name = local.replicator_name
 

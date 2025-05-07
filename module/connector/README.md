@@ -38,7 +38,7 @@ locals {
 }
 
 module "connector" {
-  source               = "git::https://github.com/oniops/tfmodule-msk.git/module/connector?ref=v1.0.0"
+  source               = "git::https://github.com/oniops/tfmodule-aws-msk.git//module/connector?ref=v1.0.0"
   msk_context          = module.ctx.context
   connector_name       = local.connector_name
   kafkaconnect_version = "2.7.1"                                      # It must be specified as a version compatible with the version of Kafka Cluster.
