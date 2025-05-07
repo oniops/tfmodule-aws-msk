@@ -1,25 +1,7 @@
-// @formatter:off
 variable "context" {
-  type = object({
-    region                    = string
-    region_alias              = string
-    project                   = string
-    environment               = string
-    env_code                  = string
-    owner                     = string
-    team                      = string
-    domain                    = string
-    pri_domain                = string
-    name_prefix               = string
-    account_id                = string
-    tags                      = map(string)
-  })
+  description = "Specify context values. This module uses the tfmodule-context Terraform module to define MSK services and resources, providing a standardized naming policy and tagging conventions, and a consistent datasource reference module. For more information about Context, see the https://github.com/oniops/tfmodule-context Terraform module."
+  type = any
 }
-// @formatter:on
-
-################################################################################
-# Connector Variables
-################################################################################
 
 variable "create" {
   description = "Determines whether cluster will be created"
@@ -27,11 +9,15 @@ variable "create" {
   default     = true
 }
 
-variable "create_connector" {
-  description = "Determines whether Connect will be created"
-  type        = bool
-  default     = true
+variable "additional_tags" {
+  description = "Specify additional tags for resources created in this module"
+  type = map(string)
+  default = {}
 }
+
+################################################################################
+# Connector Variables
+################################################################################
 
 variable "create_connector_role" {
   description = "Determines whether Connect role will be created"
@@ -76,11 +62,6 @@ EOF
   default     = {}
 }
 
-variable "service_exec_role_tags" {
-  description = "A map of additional tags to add to the connector service execution role created"
-  type        = map(string)
-  default     = {}
-}
 
 variable "connector_description" {
   description = "A description of the resource or configuration. Optional."
@@ -157,6 +138,8 @@ variable "provisioned_capacity_worker_count" {
 variable "connector_configuration" {
   type        = map(string)
   description = <<EOF
+A map of keys to values that represent the configuration for the connector.
+
 connector_configuration = {
   "connector.class"       = "io.debezium.connector.jdbc.JdbcSinkConnector"
   "tasks.max"             = "1"
@@ -266,12 +249,6 @@ variable "cloudwatch_log_group_class" {
   default     = null
 }
 
-variable "cloudwatch_log_group_tags" {
-  description = "A map of additional tags to add to the cloudwatch log group created"
-  type        = map(string)
-  default     = {}
-}
-
 ################################################################################
 # Worker Configuration Variables
 ################################################################################
@@ -303,6 +280,8 @@ variable "worker_configuration_description" {
 variable "properties_file_content" {
   type        = map(string)
   description = <<EOF
+These are the settings for configuring workers in MSK Connect. These settings determine how the workers operate, how they transform data, and how they communicate with the Kafka cluster.
+
 worker_properties_file_content = {
   "key.converter"                                = "org.apache.kafka.connect.json.JsonConverter"
   "value.converter"                              = "org.apache.kafka.connect.json.JsonConverter"
@@ -356,12 +335,6 @@ variable "plugin_arn" {
   default     = null
 }
 
-variable "plugin_tags" {
-  description = "A set of tags associated with the custom plugin."
-  type        = map(string)
-  default     = null
-}
-
 variable "plugin_revision" {
   description = "The specific revision or version identifier of the custom plugin to be used."
   type        = string
@@ -371,12 +344,6 @@ variable "plugin_revision" {
 variable "worker_configuration_arn" {
   description = "The Amazon Resource Name (ARN) of the custom plugin."
   type        = string
-  default     = null
-}
-
-variable "worker_configuration_tags" {
-  description = "A set of tags associated with the custom plugin."
-  type        = map(string)
   default     = null
 }
 

@@ -12,7 +12,6 @@ resource "aws_cloudwatch_log_group" "cwLog" {
 
   tags = merge(
     local.tags,
-    var.cloudwatch_log_group_tags,
     { Name = local.cloudwatch_log_group_name }
   )
 }

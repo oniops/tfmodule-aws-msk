@@ -9,13 +9,14 @@ git clone https://github.com/oniops/tfmodule-aws-msk.git
 cd tfmodule-aws-msk
 ```
 
-<br>
+## Context
+This module uses the tfmodule-context Terraform module to define MSK services and resources, providing a standardized naming policy and tagging conventions for AWS Best Practice model, and a consistent datasource reference module. For more information about Context, see the <a href="https://github.com/oniops/tfmodule-context">tfmodule-context</a> Terraform module.
 
 ## Usage
 
 ### Example 1 : Provisioned MSK Cluster - Standard Type Broker
 
-Provisioned 타입의 MSK Cluster에서 Standard 타입의 브로커 노드를 프로비저닝 하는 방법을 설명 합니다. 브로커에서 사용하는 클라이언트 인증 방식은 SASL/IAM 입니다.
+This chapter explains how to provision standard type of broker node with provisioned type of MSK Cluster. The client authentication for broker node is SASL/IAM.
 
 ```hcl
 module "ctx" {
@@ -39,7 +40,7 @@ locals {
 resource "aws_security_group" "this" {
   name        = "${local.cluster_name}"
   description = "MSK Cluster"
-  vpc_id      = "my-vpc-id" # MSK Cluster가 배치될 VPC ID를 입력 합니다.
+  vpc_id      = "my-vpc-id" # Enter VPC ID to place MSK Cluster.
 }
 
 resource "aws_security_group_rule" "client" {
@@ -47,7 +48,7 @@ resource "aws_security_group_rule" "client" {
   description       = "Client to MSK Cluster broker node"
   protocol          = "tcp"
   security_group_id = aws_security_group.this.id
-  cidr_blocks       = ["0.0.0.0/0"] # 클라이언트 IP 특정이 가능 한 경우 해당 IP로 대치 합니다.
+  cidr_blocks       = ["0.0.0.0/0"] # Enter Client IP if the IP can be specified.
   from_port         = 9098
   to_port           = 9098
 }
@@ -60,23 +61,23 @@ module "msk" {
   kafka_version          = "3.6.0"
   instance_type          = "kafka.t3.small"
   number_of_broker_nodes = 2
-  client_subnets         = ["client-subnet-id-1", "client-subnet-id-2"] # MSK Cluster가 배치될 서브넷 ID를 입력 합니다.
+  client_subnets         = ["client-subnet-id-1", "client-subnet-id-2"] # Enter subnet ID to place MSK Cluster.
   ebs_volume_size        = 1000
   security_groups        = [aws_security_group.this.id]
-  tags                   = module.ctx.tags
 }
 
-# MSK 클러스터 생성이 완료되면 클러스터의 브로커 Endpoint가 출력 됩니다.
+# The endpoints of broker node will be displayed after MSK Cluster is created
 output "endpoints" {
   value = module.msk.bootstrap_brokers
 }
 ```
+#### SASL/IAM Authentication
 
-클라이언트가 브로커에 연결시 사용하는 인증 방식인 SASL/IAM 은 클라이언트에 부여된 IAM Policy에 의해 제어됩니다. 필요한 권한의 예시는 아래와 같습니다.
+The authentication SASL/IAM to connect to broker node is controlled by IAM Policy. For example, necessary policies are below : 
 
- - Sid AllowMSKAccess는 MSK Cluster 연결과 관련된 권한 입니다. 연결을 위해서 기본적으로 추가 되어야 합니다.
- - Sid AllowMSKConsume는 클라이언트가 Topic에 Consume하기 위한 권한 입니다.
- - Sid AllowMSKProduce는 클라이언트가 Topic에 Produce하기 위한 권한 입니다.
+ - Sid AllowMSKAccess  : Policies for connecting to the MSK Cluster.
+ - Sid AllowMSKConsume : Policies for consuming the messages from the topics.
+ - Sid AllowMSKProduce : Policies for producing the messages to the topics.
 
 ```json
 {
@@ -120,7 +121,7 @@ output "endpoints" {
 
 ### Example 2 : Provisioned MSK Cluster - Express Type Broker
 
-Provisioned 타입의 MSK Cluster에서 Standard 타입의 브로커 노드를 프로비저닝 및 테스트 하는 방법을 설명 합니다. 브로커에서 사용하는 클라이언트 인증 방식은 SASL/IAM 입니다.
+This chapter explains how to provision express type of broker node with provisioned type of MSK Cluster. The client authentication for broker node is SASL/IAM.
 
 ```hcl
 module "ctx" {
@@ -144,7 +145,7 @@ locals {
 resource "aws_security_group" "this" {
   name        = "${local.cluster_name}"
   description = "MSK Cluster"
-  vpc_id      = "my-vpc-id" # MSK Cluster가 배치될 VPC ID를 입력 합니다.
+  vpc_id      = "my-vpc-id" # Enter VPC ID to place MSK Cluster.
 }
 
 resource "aws_security_group_rule" "client" {
@@ -152,7 +153,7 @@ resource "aws_security_group_rule" "client" {
   description       = "Client to MSK Cluster broker node"
   protocol          = "tcp"
   security_group_id = aws_security_group.this.id
-  cidr_blocks       = ["0.0.0.0/0"] # 클라이언트 IP 특정이 가능 한 경우 해당 IP로 대치 합니다.
+  cidr_blocks       = ["0.0.0.0/0"] # Enter Client IP if the IP can be specified.
   from_port         = 9098
   to_port           = 9098
 }
@@ -164,25 +165,24 @@ module "msk" {
   enable_client_auth_iam = true
   kafka_version          = "3.6.0"
   
-  # Express 타입의 브로커를 사용하기 위해 express.* 타입의 인스턴스를 사용 합니다.
+  # Enter express.* type of instance to user Express type of broker node.
   instance_type          = "express.m7g.large"
 
-  # MSK Cluster가 배치될 서브넷 ID를 입력 합니다. Express 타입의 브로커 노드는 최소 3개의 가용영역에 배치되어야 합니다.  
-  client_subnets         = ["client-subnet-id-1", "client-subnet-id-2" "client-subnet-id-3"] 
+  # Enter subnet ID to place MSK Cluster. At least, it requires 3 available zones for Express type.  
+  client_subnets         = ["client-subnet-id-1", "client-subnet-id-2", "client-subnet-id-3"] 
   number_of_broker_nodes = 3
 
   ebs_volume_size        = 1000
   security_groups        = [aws_security_group.this.id]
-  tags                   = module.ctx.tags
 }
 
-# MSK 클러스터 생성이 완료되면 클러스터의 브로커 Endpoint가 출력 됩니다.
+# The endpoints of broker node will be displayed after MSK Cluster is created
 output "endpoints" {
   value = module.msk.bootstrap_brokers
 }
 ```
 
-지원하는 Express 타입의 브로커 노드에 대한 인스턴스 타입은 아래와 같습니다.
+Supported instance types for Express type of broker node are below :
 
 - express.m7g.large
 - express.m7g.xlarge
@@ -196,7 +196,7 @@ output "endpoints" {
 
 ### Example 3 : Serverless MSK Cluster
 
-Serverless 타입의 MSK Cluster를 프로비저닝 하는 방법을 설명 합니다.
+This chapter explains how to provision serverless type of MSK Cluster. The client authentication for broker node is SASL/IAM.
 
 ```hcl
 module "ctx" {
@@ -218,9 +218,9 @@ locals {
 }
 
 resource "aws_security_group" "this" {
-  name        = "${local.cluster_name}"
+  name        = local.cluster_name
   description = "MSK Cluster"
-  vpc_id      = "my-vpc-id" # MSK Cluster가 배치될 VPC ID를 입력 합니다.
+  cidr_blocks = ["0.0.0.0/0"] # Enter Client IP if the IP can be specified.
 }
 
 resource "aws_security_group_rule" "client" {
@@ -228,7 +228,7 @@ resource "aws_security_group_rule" "client" {
   description       = "Client to MSK Cluster broker node"
   protocol          = "tcp"
   security_group_id = aws_security_group.this.id
-  cidr_blocks       = ["0.0.0.0/0"] # 클라이언트 IP 특정이 가능 한 경우 해당 IP로 대치 합니다.
+  cidr_blocks       = ["0.0.0.0/0"] # Enter Client IP if the IP can be specified.
   from_port         = 9098
   to_port           = 9098
 }
@@ -239,17 +239,16 @@ module "msk" {
   cluster_name           = local.cluster_name
   kafka_version          = "3.6.0" 
 
-  # Serverless 타입의 Cluster를 생성 합니다.
-  # Serverless는 브로커 노드에 대한 정보 (인스턴스 타입, 노드 개수, 스토리지 볼륨) 를 요구하지 않습니다.
+  # Create Serverless type of MSK Cluster.
+  # No need to set instance type, number of nodes, storage volume size for Serverless type of MSK Cluster.
   enable_serverless_cluster = true 
   
   client_subnets         = ["client-subnet-id-1", "client-subnet-id-2"]
   security_groups        = [aws_security_group.this.id]
   enable_client_auth_iam = true
-  tags                   = module.ctx.tags
 }
 
-# MSK 클러스터 생성이 완료되면 클러스터의 브로커 Endpoint가 출력 됩니다.
+# The endpoints of broker node will be displayed after MSK Cluster is created.
 output "endpoints" {
   value = module.msk.bootstrap_brokers
 }
@@ -257,7 +256,7 @@ output "endpoints" {
 
 ## Variables
 
-tfmodule-aws-msk에서 사용되는 Input/Output 변수에 대해서 설명 합니다.
+This chapter describes Input/Output variables using in tfmodule-aws-msk.
 
 ### Input Variables
 
@@ -840,53 +839,56 @@ tfmodule-aws-msk에서 사용되는 Input/Output 변수에 대해서 설명 합�
 
 ## How to connect to MSK
 
-MSK Cluster를 프로비저닝 한 후 연결 테스트를 하기 위해 kafka-script를 준비해야 합니다.
+To test connect too MSK Cluster, you need to prepare kafka-script.
 
-먼저 테스트를 위한 클라이언트 머신에 Java를 설치 합니다.
+<br>
+
+First, install Java in your machine.
 
 ```sh
 sudo yum -y install java-11
 ```
 
-그 다음, Apache Kafka에서 제공하는 Cluster 관리용 스크립트를 다운로드 합니다. {YOUR MSK VERSION} 에는 프로비저닝 한 MSK Cluster의 Kafka 버전을 기입 합니다.
+After then, download management script for Kafka provided by Apache Kafka. Enter Kafka version of MSK Cluster on {YOUR MSK VERSION}.
 
 ```sh
 wget https://archive.apache.org/dist/kafka/{YOUR MSK VERSION}/kafka_2.13-{YOUR MSK VERSION}.tgz
 ```
 
-예를 들어 Amazon MSK를 Apache Kafka 버전이 3.6.0인 경우 다음 명령을 실행합니다.
+For example, the Apache Kafka version is 3.6.0, execute following command :
 
 ```sh
 wget https://archive.apache.org/dist/kafka/3.6.0/kafka_2.13-3.6.0.tgz
 ```
 
-다운로드 한 TAR 압축 파일을 압축해제 합니다. 명령어는 다운로드 한 디렉토리에서 수행 합니다.
+Decompress downloaded TAR file.
 
 ```sh
 tar -xzf kafka_2.13-{YOUR MSK VERSION}.tgz
 ```
 
-kafka_2.13-{YOUR MSK VERSION}/config 디렉토리로 이동하여 연결에 사용 할 인증정보가 담긴 client.properties 를 생성 합니다.
+Mode to kafka_2.13-{YOUR MSK VERSION}/config directory and create client.properties file included authentication information to connect.
 
 ```sh
 cd kafka_2.13-{YOUR MSK VERSION}/config
 touch client.properties
 ```
 
-client.properties 파일의 내용은 아래와 같이 클라이언트 인증 방식에 따라서 작성 합니다.  클라이언트 인증 방식이 NOAUTH 인 경우 (enable_client_noauth == true) security.protocol=PLAINTEXT로 설정 해주세요.
+Write contents of client.properties
+The contents of the client.properties file are written according to the client authentication method as follows. If the client authentication method is NOAUTH (enable_client_noauth == true), set security.protocol=PLAINTEXT.
 
 ```sh
 security.protocol=SASL_SSL
 ```
 
-클라이언트 인증 방식이 SASL/IAM 인 경우 (enable_client_auth_iam == true) 먼저 kafka_2.13-{YOUR MSK VERSION}/libs 디렉터리로 이동하고 다음 명령을 실행하여 Amazon MSK IAM JAR 파일을 다운로드합니다.
+If your client authentication method is SASL/IAM (enable_client_auth_iam == true), first navigate to the kafka_2.13-{YOUR MSK VERSION}/libs directory and run the following command to download the Amazon MSK IAM JAR file.
 
 ```sh
 cd kafka_2.13-{YOUR MSK VERSION}/libs
 wget https://github.com/aws/aws-msk-iam-auth/releases/download/v2.3.0/aws-msk-iam-auth-2.3.0-all.jar
 ```
 
-그 다음 client.properties 파일에 내용을 기입 합니다. 클라이언트와 브로커가 암호화 되지 않은 통신을 하는 경우 security.protocol=PLAINTEXT로 설정 해주세요.
+Next, fill in the client.properties file. If the client and broker communicate unencrypted, set security.protocol=PLAINTEXT.
 
 ```sh
 security.protocol=SASL_SSL
@@ -895,7 +897,7 @@ sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;
 sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
 ```
 
-클라이언트 인증 방식이 SASL/SCRAM 인 경우 (enable_client_auth_scram == true) 아래와 같이 설정 합니다. 클라이언트와 브로커가 암호화 되지 않은 통신을 하는 경우 security.protocol=PLAINTEXT로 설정 해주세요.
+If the client authentication method is SASL/SCRAM (enable_client_auth_scram == true), set it as follows. If the client and broker communicate unencrypted, set security.protocol=PLAINTEXT.
 
 ```sh
 security.protocol=SASL_SSL
@@ -903,7 +905,7 @@ sasl.mechanism=SCRAM-SHA-512
 sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required username="{USERNAME}" password="{PASSWORD}";
 ```
 
-마지막으로 아래와 같은 명령어를 통해 정상적으로 클러스터에 연결하여 토픽 리스트를 가져올 수 있는지 확인 합니다.
+Finally, check if you can successfully connect to the cluster and retrieve the topic list using the command below.
 
 ```sh
 kafka_2.13-{YOUR MSK VERSION}/bin/kafka-topics.sh --list \
@@ -911,7 +913,7 @@ kafka_2.13-{YOUR MSK VERSION}/bin/kafka-topics.sh --list \
     --command-config kafka_2.13-{YOUR MSK VERSION}/config/client.properties
 ```
 
-결과 예시는 아래와 같습니다.
+An example result is shown below.
 
 ```sh
 MSKTutorialTopic
@@ -922,7 +924,7 @@ __consumer_offsets
 
 ## How to test topic
 
-토픽의 생성과 Produce, 그리고 Consume 테스트 방법을 설명 합니다. 먼저 아래의 명령어로 토픽을 생성 합니다.
+Explain how to create a topic, produce it, and test the consume method. First, create a topic with the command below.
 
 ```sh
 kafka_2.13-{YOUR MSK VERSION}/bin/kafka-topics.sh --create \
@@ -933,13 +935,13 @@ kafka_2.13-{YOUR MSK VERSION}/bin/kafka-topics.sh --create \
     --topic "example-topic"
 ```
 
-토픽이 생성되면 아래와 같이 출력 됩니다.
+When a topic is created, it is printed as follows.
 
 ```sh
 Created example-topic
 ```
 
-다음으로, 아래의 명령어로 생성된 토픽에 메세지를 Produce 합니다.
+Next, produce a message to the topic created with the command below.
 
 ```sh
 kafka_2.13-{YOUR MSK VERSION}/bin/kafka-console-producer.sh \
@@ -948,7 +950,7 @@ kafka_2.13-{YOUR MSK VERSION}/bin/kafka-console-producer.sh \
     --topic "example-topic"
 ```
 
-스크립트 실행 후 아래와 같이 CLI에 Produce 할 메세지를 입력 합니다. 메세지 Produce가 끝나면 ctrl+c 를 입력하여 스크립트를 종료 합니다.
+After running the script, enter the message to be produced in the CLI as shown below. When message produce is complete, enter ctrl+c to exit the script.
 
 ```sh
 >example-msg-1
@@ -956,7 +958,7 @@ kafka_2.13-{YOUR MSK VERSION}/bin/kafka-console-producer.sh \
 >^C
 ```
 
-아래의 명령어를 이용하여 생성된 토픽에 Produce한 메세지를 Consume 합니다.
+Consume the produced messages in the created topic using the command below.
 
 ```sh
 kafka_2.13-{YOUR MSK VERSION}/bin/kafka-console-consumer.sh \
@@ -966,7 +968,7 @@ kafka_2.13-{YOUR MSK VERSION}/bin/kafka-console-consumer.sh \
     --topic "example-topic"
 ```
 
-스크립트 실행 후 아래와 같이 CLI에 Produce 하였던 메세지가 출력 됩니다. 메세지 Consume이 끝나면 ctrl+c 를 입력하여 스크립트를 종료 합니다.
+After executing the script, the message produced in the CLI is output as shown below. When message consumption is finished, enter ctrl+c to exit the script.
 
 ```sh
 example-msg-1
@@ -975,4 +977,5 @@ example-msg-2
 ```
 
 # LICENSE
-This module is customized from [terraform-aws-msk-kafka-cluster](https://github.com/terraform-aws-modules/terraform-aws-msk-kafka-cluster), and follows the license policy of [terraform-aws-msk-kafka-cluster](https://github.com/terraform-aws-modules/terraform-aws-msk-kafka-cluster). See for Apache-2.0 [LICENSE](https://github.com/oniops/tfmodule-aws-msk/blob/main/LICENSE).
+ - See for Apache-2.0 [LICENSE](https://github.com/oniops/tfmodule-aws-msk/blob/main/LICENSE).
+ - This module is customized from [terraform-aws-msk-kafka-cluster](https://github.com/terraform-aws-modules/terraform-aws-msk-kafka-cluster), and follows the license policy of [terraform-aws-msk-kafka-cluster](https://github.com/terraform-aws-modules/terraform-aws-msk-kafka-cluster).

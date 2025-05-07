@@ -30,9 +30,10 @@ resource "aws_iam_role" "this" {
   permissions_boundary  = var.service_exec_role_permissions_boundary
   force_detach_policies = true
 
-  tags = merge(local.tags, var.service_exec_role_tags, {
-    Name = local.connector_name
-  })
+  tags = merge(
+    local.tags,
+    { Name = local.service_exec_role_name }
+  )
 }
 
 resource "aws_iam_role_policy" "msk" {

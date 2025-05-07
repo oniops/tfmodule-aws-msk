@@ -3,7 +3,7 @@ locals {
   region          = var.context.region
   account_id      = var.context.account_id
   project         = var.context.project
-  tags            = var.context.tags
+  tags            = merge(var.context.tags, var.additional_tags)
   replicator_name = var.replicator_fullname != null ? var.replicator_fullname : "${local.name_prefix}-${var.replicator_name}-rc"
   description     = var.description != null ? var.description : local.replicator_name
 }
@@ -75,10 +75,10 @@ resource "aws_msk_replicator" "this" {
     delete = "1h"
   }
 
-  tags = merge(local.tags,
-    var.replicator_tags, {
-      Name = local.replicator_name
-    })
+  tags = merge(
+    local.tags,
+    { Name = local.replicator_name }
+  )
 
   depends_on = [
     aws_iam_role.this

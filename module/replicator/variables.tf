@@ -1,4 +1,5 @@
 variable "context" {
+  description = "Specify context values. This module uses the tfmodule-context Terraform module to define MSK services and resources, providing a standardized naming policy and tagging conventions, and a consistent datasource reference module. For more information about Context, see the https://github.com/oniops/tfmodule-context Terraform module."
   type = any
 }
 
@@ -8,8 +9,8 @@ variable "create" {
   default     = true
 }
 
-variable "tags" {
-  description = "A map of tags to assign to the resources created"
+variable "additional_tags" {
+  description = "Specify additional tags for resources created in this module"
   type = map(string)
   default = {}
 }
@@ -145,19 +146,4 @@ variable "synchronise_consumer_group_offsets" {
   type        = bool
   default     = true
   description = "Whether to periodically write the translated offsets to __consumer_offsets topic in target cluster."
-}
-
-variable "replicator_tags" {
-  description = "A map of additional tags to add to the replicator"
-  type = map(string)
-  default = {}
-}
-
-################################################################################
-# IAM
-################################################################################
-variable "role_tags" {
-  description = "A map of additional tags to add to the role"
-  type = map(string)
-  default = {}
 }

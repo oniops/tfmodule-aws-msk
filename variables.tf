@@ -1,21 +1,7 @@
-// @formatter:off
 variable "context" {
-  type = object({
-    region                    = string
-    region_alias              = string
-    project                   = string
-    environment               = string
-    env_code                  = string
-    owner                     = string
-    team                      = string
-    domain                    = string
-    pri_domain                = string
-    name_prefix               = string
-    account_id                = string
-    tags                      = map(string)
-  })
+  description = "Specify context values. This module uses the tfmodule-context Terraform module to define MSK services and resources, providing a standardized naming policy and tagging conventions, and a consistent datasource reference module. For more information about Context, see the https://github.com/oniops/tfmodule-context Terraform module."
+  type = any
 }
-// @formatter:on
 
 variable "create" {
   description = "Determines whether cluster resources will be created"

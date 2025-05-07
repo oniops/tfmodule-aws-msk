@@ -26,9 +26,10 @@ resource "aws_iam_role" "this" {
   assume_role_policy    = local.trust
   force_detach_policies = true
 
-  tags = merge(local.tags, var.role_tags, {
-    Name = local.role_name
-  })
+  tags = merge(
+    local.tags,
+    { Name = local.role_name }
+  )
 }
 
 resource "aws_iam_role_policy" "this" {

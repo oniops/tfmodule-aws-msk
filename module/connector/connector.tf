@@ -2,7 +2,7 @@ locals {
   create      = var.create
   project     = var.context.project
   region      = var.context.region
-  tags        = var.context.tags
+  tags        = merge(var.context.tags, var.additional_tags)
   account_id  = var.context.account_id
   name_prefix = var.context.name_prefix
 
@@ -17,7 +17,7 @@ locals {
 }
 
 resource "aws_mskconnect_connector" "this" {
-  count                      = local.create && var.create_connector ? 1 : 0
+  count                      = local.create ? 1 : 0
   name                       = local.connector_name
   description                = var.connector_description
   kafkaconnect_version       = var.kafkaconnect_version
@@ -101,9 +101,10 @@ resource "aws_mskconnect_connector" "this" {
     }
   }
 
-  tags = merge(local.tags, {
-    Name = local.connector_name
-  })
+  tags = merge(
+    local.tags,
+    { Name = local.connector_name }
+  )
 
   depends_on = [
     aws_cloudwatch_log_group.cwLog[0],

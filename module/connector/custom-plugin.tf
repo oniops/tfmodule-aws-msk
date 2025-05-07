@@ -18,7 +18,8 @@ resource "aws_mskconnect_custom_plugin" "this" {
     }
   }
 
-  tags = merge(local.tags, var.plugin_tags,
+  tags = merge(
+    local.tags,
     { Name = local.connector_name }
   )
 }
