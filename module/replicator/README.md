@@ -101,7 +101,7 @@ module "replicator" {
 
 Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
 
-### Input Variables
+### [Input Variables](https://oniops.github.io/tfmodule-aws-msk/readme-replicator-input-variables.html)
 
 <table>
     <thead>

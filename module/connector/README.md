@@ -68,7 +68,7 @@ module "connector" {
 
 Describes the Input/Output variables used in tfmodule-aws-msk/connector.
 
-### Input Variables
+### [Input Variables](https://oniops.github.io/tfmodule-aws-msk/readme-connector-input-variables.html)
 
 <table>
     <thead>

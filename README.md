@@ -10,7 +10,9 @@ cd tfmodule-aws-msk
 ```
 
 ## Context
-This module uses the tfmodule-context Terraform module to define MSK services and resources, providing a standardized naming policy and tagging conventions for AWS Best Practice model, and a consistent datasource reference module. For more information about Context, see the <a href="https://github.com/oniops/tfmodule-context">tfmodule-context</a> Terraform module.
+This module uses the tfmodule-context Terraform module to define MSK services and resources, providing a standardized naming policy and tagging conventions for AWS Best Practice model, and a consistent datasource reference module.
+<br>
+For more information about Context, see the <a href="https://github.com/oniops/tfmodule-context">tfmodule-context</a> Terraform module.
 
 ## Usage
 
@@ -48,13 +50,13 @@ resource "aws_security_group_rule" "client" {
   description       = "Client to MSK Cluster broker node"
   protocol          = "tcp"
   security_group_id = aws_security_group.this.id
-  cidr_blocks       = ["0.0.0.0/0"] # Enter Client IP if the IP can be specified.
+  cidr_blocks       = ["10.0.0.0/16"] # Recommend VPC CIDR as cidr_blocks. Enter Client IP if the IP can be specified.
   from_port         = 9098
   to_port           = 9098
 }
 
 module "msk" {
-  source                 = "git::https://github.com/oniops/tfmodule-msk.git?ref=v1.0.0"
+  source                 = "git::https://github.com/oniops/tfmodule-aws-msk.git?ref=v1.0.0"
   context                = module.ctx.context
   cluster_name           = local.cluster_name
   enable_client_auth_iam = true
@@ -78,6 +80,8 @@ The authentication SASL/IAM to connect to broker node is controlled by IAM Polic
  - Sid AllowMSKAccess  : Policies for connecting to the MSK Cluster.
  - Sid AllowMSKConsume : Policies for consuming the messages from the topics.
  - Sid AllowMSKProduce : Policies for producing the messages to the topics.
+ - Sid AllowMSKTopicAccess : Policies for read configurations for topic and create/delete the topics.
+ - Sid AllowMSKGroupAccess : Policies for read/create the consumer groups.
 
 ```json
 {
@@ -111,7 +115,27 @@ The authentication SASL/IAM to connect to broker node is controlled by IAM Polic
         "kafka-cluster:DescribeTopic"
       ],
       "Resource": "arn:aws:kafka:ap-northeast-2:111122223333:topic/my-demo-msk-cluster/*"
-    }
+    },
+    {
+      "Sid": "AllowMSKTopicAccess",
+      "Effect": "Allow",
+      "Action": [
+        "kafka-cluster:CreateTopic",
+        "kafka-cluster:AlterTopic",        
+        "kafka-cluster:DeleteTopic",
+        "kafka-cluster:DescribeTopicDynamicConfiguration"        
+      ],
+      "Resource": "arn:aws:kafka:ap-northeast-2:111122223333:topic/my-demo-msk-cluster/*"
+    },
+    {
+      "Sid": "AllowMSKGroupAccess",
+      "Effect": "Allow",
+      "Action": [
+        "kafka-cluster:DescribeGroup",
+        "kafka-cluster:AlterGroup"
+      ],
+      "Resource": "arn:aws:kafka:ap-northeast-2:111122223333:group/my-demo-msk-cluster/*"
+    } 
   ]
 }
 ```
@@ -153,13 +177,13 @@ resource "aws_security_group_rule" "client" {
   description       = "Client to MSK Cluster broker node"
   protocol          = "tcp"
   security_group_id = aws_security_group.this.id
-  cidr_blocks       = ["0.0.0.0/0"] # Enter Client IP if the IP can be specified.
+  cidr_blocks       = ["10.0.0.0/16"] # Recommend VPC CIDR as cidr_blocks. Enter Client IP if the IP can be specified.
   from_port         = 9098
   to_port           = 9098
 }
 
 module "msk" {
-  source                 = "git::https://github.com/oniops/tfmodule-msk.git?ref=v1.0.0"
+  source                 = "git::https://github.com/oniops/tfmodule-aws-msk.git?ref=v1.0.0"
   context                = module.ctx.context
   cluster_name           = local.cluster_name
   enable_client_auth_iam = true
@@ -220,7 +244,7 @@ locals {
 resource "aws_security_group" "this" {
   name        = local.cluster_name
   description = "MSK Cluster"
-  cidr_blocks = ["0.0.0.0/0"] # Enter Client IP if the IP can be specified.
+  vpc_id      = "my-vpc-id" # Enter VPC ID to place MSK Cluster.
 }
 
 resource "aws_security_group_rule" "client" {
@@ -228,13 +252,13 @@ resource "aws_security_group_rule" "client" {
   description       = "Client to MSK Cluster broker node"
   protocol          = "tcp"
   security_group_id = aws_security_group.this.id
-  cidr_blocks       = ["0.0.0.0/0"] # Enter Client IP if the IP can be specified.
+  cidr_blocks       = ["10.0.0.0/16"] # Recommend VPC CIDR as cidr_blocks. Enter Client IP if the IP can be specified.
   from_port         = 9098
   to_port           = 9098
 }
 
 module "msk" {
-  source                 = "git::https://github.com/oniops/tfmodule-msk.git?ref=v1.0.0"
+  source                 = "git::https://github.com/oniops/tfmodule-aws-msk.git?ref=v1.0.0"
   context                = module.ctx.context
   cluster_name           = local.cluster_name
   kafka_version          = "3.6.0" 
@@ -258,7 +282,7 @@ output "endpoints" {
 
 This chapter describes Input/Output variables using in tfmodule-aws-msk.
 
-### [Input Variables](https://oniops.github.io/tfmodule-aws-msk/docs/readme-input-variables.html)
+### [Input Variables](https://oniops.github.io/tfmodule-aws-msk/readme-cluster-input-variables.html)
 
 <table>
 <thead>
@@ -718,7 +742,7 @@ This chapter describes Input/Output variables using in tfmodule-aws-msk.
 </tbody>
 </table>
 
-### Output Variables
+### [Output Variables](https://oniops.github.io/tfmodule-aws-msk/readme-cluster-output-variables.html)
 
 <table>
 <thead>
@@ -881,6 +905,11 @@ The contents of the client.properties file are written according to the client a
 security.protocol=SASL_SSL
 ```
 
+If you'd like to specify "consumer group", you can set by the property like :
+```sh
+group.id={CONSUMER GROUP ID}
+```
+
 If your client authentication method is SASL/IAM (enable_client_auth_iam == true), first navigate to the kafka_2.13-{YOUR MSK VERSION}/libs directory and run the following command to download the Amazon MSK IAM JAR file.
 
 ```sh
@@ -964,7 +993,7 @@ Consume the produced messages in the created topic using the command below.
 kafka_2.13-{YOUR MSK VERSION}/bin/kafka-console-consumer.sh \
     --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
     --consumer.config kafka_2.13-{YOUR MSK VERSION}/config/client.properties \
-    --offset latest \
+    --from-beginning \
     --topic "example-topic"
 ```
 
@@ -974,6 +1003,59 @@ After executing the script, the message produced in the CLI is output as shown b
 example-msg-1
 example-msg-2
 ^C
+```
+
+## How to check importance values
+
+This section describes some importance values in Kafka broker node.
+
+### Offset
+
+Don't forget setting `group.id` property in the `client.properties` to specify consumer group.
+Go to [How to connect to MSK](#How-to-connect-to-MSK) section for the details.
+
+```
+group.id={CONSUMER GROUP ID}
+```
+
+Then, run below command to check offset :
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-consumer-groups.sh \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --command-config kafka_2.13-{YOUR MSK VERSION}/config/client.properties \
+    --describe \
+    --group "{CONSUMER GROUP ID}"
+```
+
+After executing the script, data shows like :
+
+```sh
+GROUP                 TOPIC           PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID
+{CONSUMER GROUP ID}   example-topic   0          2               2               0               -               -               -
+```
+
+### Partition
+
+To check partition of topics, run below command :
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-topics.sh \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --describe
+```
+
+After executing the script, data shows like :
+
+```sh
+Topic: __amazon_msk_canary	TopicId: aaBbCcDd12345678ffffcCCC	PartitionCount: 2	ReplicationFactor: 2	Configs: min.insync.replicas=1,cleanup.policy=delete,retention.ms=86400000,message.format.version=3.0-IV1,unclean.leader.election.enable=true,retention.bytes=-1
+Topic: __amazon_msk_canary	Partition: 0	Leader: 2	Replicas: 2,1	Isr: 2,1
+Topic: __amazon_msk_canary	Partition: 1	Leader: 1	Replicas: 1,2	Isr: 1,2
+Topic: example-topic	TopicId: aaBbCcDd12345678ffffcQQQ	PartitionCount: 1	ReplicationFactor: 2	Configs: min.insync.replicas=1,message.format.version=3.0-IV1,unclean.leader.election.enable=true
+Topic: example-topic	Partition: 0	Leader: 2	Replicas: 2,1	Isr: 2,1
+Topic: __consumer_offsets	TopicId: 12345Dd12345678ffffcCCC	PartitionCount: 50	ReplicationFactor: 2	Configs: compression.type=producer,min.insync.replicas=1,cleanup.policy=compact,segment.bytes=104857600,message.format.version=3.0-IV1,unclean.leader.election.enable=true
+Topic: __consumer_offsets	Partition: 0	Leader: 1	Replicas: 1,2	Isr: 1,2
+...
 ```
 
 # LICENSE

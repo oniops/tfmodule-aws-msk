@@ -41,7 +41,6 @@ module "connection" {
   vpc_id             = "client-vpc-id"              # Enter the VPC ID where the accessing client is deployed.
   security_groups    = ["client-security-group-id"] # Enter the Security Group ID of the accessing client.
   client_subnets     = ["client-subnet-id-1", "client-subnet-id-2"] # Enter the Subnet ID used by the accessing client.
-  tags               = module.ctx.tags
 }
 ```
 
@@ -89,14 +88,6 @@ Describes the Input/Output variables used in tfmodule-aws-msk/managed-vpc-connec
                 pri_domain = "example.internal"
             }
             </pre></td>
-        </tr>
-        <tr>
-            <td>additional_tags</td>
-            <td>Specify additional tags for resources created in this module. All default tags for all resources depend on Context values. Please refer "tags" value in <a href = "https://github.com/oniops/tfmodule-context">tfmodule-context</a> module.</td>
-            <td>map(string)</td>
-            <td>null</td>
-            <td>no</td>
-            <td>{Timestamp = "20101231", CompanyURL = "https://my-company-url.com"}</td>
         </tr>
         <tr>
             <td>target_cluster_arn</td>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MSK Cluster Input Variables</title>
+</head>
+<body>
+
+<table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Type</th>
+        <th>Example</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>arn</td>
+        <td>Amazon Resource Name (ARN) of the MSK cluster.</td>
+        <td>string</td>
+        <td>"arn:aws:kafka:us-east-1:111122223333:cluster/demomsk/11112222-3344-5566-7788-152f5289c6dd-14"</td>
+    </tr>
+    <tr>
+        <td>cluster_name</td>
+        <td>Name of the MSK cluster</td>
+        <td>string</td>
+        <td>"my-msk-cluster"</td>
+    </tr>
+    <tr>
+        <td>cluster_uuid</td>
+        <td>UUID of the MSK cluster, for use in IAM policies</td>
+        <td>string</td>
+        <td>"11112222-3344-5566-7788-152f5289c6dd-14"</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_plaintext</td>
+        <td>Comma separated list of one or more hostname:port pairs of kafka brokers suitable to bootstrap connectivity to the kafka cluster. Contains a value if encryption_in_transit_client_broker is set to PLAINTEXT or TLS_PLAINTEXT.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9092","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9092"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_sasl_iam</td>
+        <td>One or more DNS names (or IP addresses) and SASL IAM port pairs. This attribute will have a value if encryption_in_transit_client_broker is set to TLS_PLAINTEXT or TLS and client_authentication_sasl_iam is set to true.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9098","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9098"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_sasl_scram</td>
+        <td>One or more DNS names (or IP addresses) and SASL SCRAM port pairs. This attribute will have a value if encryption_in_transit_client_broker is set to TLS_PLAINTEXT or TLS and `client_authentication_sasl_scram` is set to true.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9096","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9096"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_tls</td>
+        <td>One or more DNS names (or IP addresses) and TLS port pairs. This attribute will have a value if encryption_in_transit_client_broker is set to TLS_PLAINTEXT or TLS.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9094","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9094"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers</td>
+        <td>Comma separated list of one or more hostname:port pairs of kafka brokers suitable to bootstrap connectivity to the kafka cluster.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9092","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9098"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_authentication</td>
+        <td>Name string of brokers authentication for client. SASL_IAM for IAM, SASL_SCRAM for SASL/SCRAM, TLS for mutual TLS.</td>
+        <td>string</td>
+        <td>"SASL_IAM"</td>
+    </tr>
+    <tr>
+        <td>zookeeper_connect_string</td>
+        <td>A comma separated list of one or more hostname:port pairs to use to connect to the Apache Zookeeper cluster. The returned values are sorted alphabetically.</td>
+        <td>list(string)</td>
+        <td>["z-3.demomsk.aabbcc.c14.kafka.us-east-1.amazonaws.com:2181","z-1.demomsk.11aabb.c14.kafka.us-east-1.amazonaws.com":2181,"z-2.demomsk.abcd1234.c14.kafka.us-east-1.amazonaws.com:2181"]</td>
+    </tr>
+    <tr>
+        <td>zookeeper_connect_string_tls</td>
+        <td>A comma separated list of one or more hostname:port pairs to use to connect to the Apache Zookeeper cluster via TLS. The returned values are sorted alphabetically.</td>
+        <td>list(string)</td>
+        <td>["z-3.demomsk.aabbcc.c14.kafka.us-east-1.amazonaws.com:2182","z-1.demomsk.11aabb.c14.kafka.us-east-1.amazonaws.com":2182,"z-2.demomsk.abcd1234.c14.kafka.us-east-1.amazonaws.com:2182"]</td>
+    </tr>
+    <tr>
+        <td>configuration_arn</td>
+        <td>Amazon Resource Name (ARN) of the MSK Cluster configuration.</td>
+        <td>string</td>
+        <td>"arn:aws:kafka:us-east-1:111122223333:configuration/demomskcfg/1234abcd-1111-2222-33aa-aaaabbbbcccc-14"</td>
+    </tr>
+    <tr>
+        <td>configuration_latest_revision</td>
+        <td>Latest revision of the MSK Cluster configuration.</td>
+        <td>string</td>
+        <td>"7"</td>
+    </tr>
+    <tr>
+        <td>scram_secret_association_id</td>
+        <td>The ID of the MSK SCRAM secret association.</td>
+        <td>string</td>
+        <td>"arn:aws:kafka:us-east-1:111122223333:cluster/demomsk/abcd1234-abcd-5678-abcd-1234abcd5678-1/scram-secret-association/efgh5678-ijkl-9012-mnop-3456qrst7890"</td>
+    </tr>
+    <tr>
+        <td>log_group_arn</td>
+        <td>The Amazon Resource Name (ARN) specifying the Cloudwatch log group.</td>
+        <td>string</td>
+        <td>"arn:aws:logs:us-east-1:111122223333:log-group:/msk/demomsk"</td>
+    </tr>
+    <tr>
+        <td>appautoscaling_policy_arn</td>
+        <td>The ARN assigned by AWS to the scaling policy.</td>
+        <td>string</td>
+        <td>"arn:aws:autoscaling:us-east-1:111122223333:scalingPolicy:11112222-3333-aabb-4444-555566667777:resource/msk/default/demomsk:pplocyName/my-as-policy-name"</td>
+    </tr>
+    <tr>
+        <td>appautoscaling_policy_name</td>
+        <td>The scaling policy's name.</td>
+        <td>string</td>
+        <td>"my-as-policy-name"</td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
