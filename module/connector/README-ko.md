@@ -16,7 +16,7 @@ Context에 관한 자세한 내용은 Terraform 모듈 [tfmodule-context](https:
 
 ## Usage
 
-MSK Connector에 대한 자세한 내용은 [AWS Documentation](https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/msk-connect.html) 문서를 참고하세요.
+MSK Connector에 대한 자세한 내용은 [AWS 가이드문서](https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/msk-connect.html) 문서를 참고하세요.
 
 ### Example
 

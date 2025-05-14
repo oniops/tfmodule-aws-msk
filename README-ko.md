@@ -146,7 +146,6 @@ output "endpoints" {
 
 ### Example 2 : Provisioned MSK Cluster - Express Type Broker
 Provisioned MSK Cluster - Express Type Broker에 대한 자세한 내용은 [AWS 가이드 문서](https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/msk-broker-types-express.html) 를 참고해주세요.
-[this AWS Documentation]().
 <br>
 이 장에서는 프로비저닝된(provisioned) 유형의 MSK 클러스터에서 Express 유형의 브로커 노드를 생성(provision)하는 방법을 설명합니다. 브로커 노드에 대한 클라이언트 인증 방식은 SASL/IAM입니다.
 
@@ -222,7 +221,7 @@ Express 유형의 브로커 노드에서 지원되는 인스턴스 타입은 다
 <br>
 
 ### Example 3 : Serverless MSK Cluster
-Serverless MSK Cluster 에 대한 자세한 내용은 [this AWS Documentation](https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/serverless.html).
+Serverless MSK Cluster 에 대한 자세한 내용은 [AWS 가이드 문서](https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/serverless.html)를 참고해주세요.
 <br>
 이 장에서는 서버리스(Serverless) 유형의 MSK 클러스터를 생성(provision)하는 방법을 설명합니다. 브로커 노드에 대한 클라이언트 인증 방식은 SASL/IAM입니다.
 
