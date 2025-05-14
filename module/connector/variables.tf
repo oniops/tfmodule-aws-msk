@@ -180,13 +180,13 @@ variable "authentication_type" {
 }
 
 variable "cloudwatch_logs_enabled" {
-  description = "Indicates whether you want to enable or disable streaming broker logs to Cloudwatch Logs"
+  description = "Indicates whether you want to enable or disable streaming connector logs to Cloudwatch Logs"
   type        = bool
   default     = true
 }
 
 variable "firehose_logs_enabled" {
-  description = "Indicates whether you want to enable or disable streaming broker logs to Kinesis Data Firehose"
+  description = "Indicates whether you want to enable or disable streaming connector logs to Kinesis Data Firehose"
   type        = bool
   default     = false
 }
@@ -198,7 +198,7 @@ variable "firehose_delivery_stream" {
 }
 
 variable "s3_logs_enabled" {
-  description = "Indicates whether you want to enable or disable streaming broker logs to S3"
+  description = "Indicates whether you want to enable or disable streaming connector logs to S3"
   type        = bool
   default     = false
 }

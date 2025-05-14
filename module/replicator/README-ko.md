@@ -1,6 +1,6 @@
 # tfmodule-aws-msk/replicator
 
-tfmodule-aws-msk/replicator is Terraform module which creates AWS MSK Replicator resources.
+tfmodule-aws-msk/replicator는 AWS MSK Replicator 리소스를 생성하는 Terraform 모듈입니다.
 
 ## How to clone
 
@@ -10,15 +10,17 @@ cd tfmodule-aws-msk/module/replicator
 ```
 
 ## Context
-This module uses the tfmodule-context Terraform module to define MSK services and resources, providing a standardized naming policy and tagging conventions for AWS Best Practice model, and a consistent datasource reference module. For more information about Context, see the <a href="https://github.com/oniops/tfmodule-context">tfmodule-context</a> Terraform module.
+이 모듈은 tfmodule-context Terraform 모듈을 사용하여 MSK 서비스 및 리소스를 정의하며, AWS 모범 사례(Best Practice) 모델에 따라 표준화된 네이밍 정책과 태그 규칙을 제공하고, 일관된 데이터 소스 참조 모듈을 제공합니다.
+<br>
+Context에 관한 자세한 내용은 Terraform 모듈 [tfmodule-context](https://github.com/oniops/tfmodule-context) 을 참고해주세요.
 
 ## Usage
 
-For more details about MSK Replicator, Please see this [AWS Documentation](https://docs.aws.amazon.com/msk/latest/developerguide/msk-replicator.html).
+MSK Replicator 에 대한 자세한 내용은 [AWS Documentation](https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/msk-replicator.html) 를 참고하세요.
 
 ### Example
 
-Describes how to provision a Replicator that copies topic data from a source MSK Cluster to a target MSK Cluster.
+소스 MSK 클러스터에서 대상 MSK 클러스터로 토픽 데이터를 복제하는 Replicator를 프로비저닝(생성)하는 방법은 다음과 같습니다.
 
 ```hcl
 module "ctx" {
@@ -42,7 +44,7 @@ locals {
 resource "aws_security_group" "this" {
   name        = var.replicator_name
   description = "MSK Replicator"
-  vpc_id      = "my-vpc-id" # Enter the VPC ID where the Replicator will be deployed.
+  vpc_id      = "my-vpc-id" # Replicator가 배치 될 VPC ID를 입력하세요.
 }
 
 resource "aws_security_group_rule" "source" {
@@ -51,11 +53,11 @@ resource "aws_security_group_rule" "source" {
   protocol          = "tcp"
   security_group_id = aws_security_group.this.id
 
-  # If the broker node IP of the source MSK Cluster can be specified, replace it with that IP.
-  # It is recommended to specify the Security Group of the Source MSK Cluster using the source_security_group_id attribute, if possible.
-  cidr_blocks = ["0.0.0.0/0"]
+  # 소스 MSK 클러스터의 브로커 노드 IP를 지정할 수 있는 경우, 해당 IP로 교체하세요.  
+  # 가능하다면, source_security_group_id 속성을 사용하여 소스 MSK 클러스터의 보안 그룹을 지정하는 것을 권장합니다.
+  cidr_blocks = ["10.0.0.0/16"]
 
-  # Enter the broker node port of the Source MSK Cluster.
+  # 소스 MSK 클러스터의 브로커 노드 포트를 입력하세요.
   from_port = 9098
   to_port   = 9098
 }
@@ -66,9 +68,9 @@ resource "aws_security_group_rule" "target" {
   protocol          = "tcp"
   security_group_id = aws_security_group.this.id
 
-  # If the broker node IP of the target MSK Cluster can be specified, replace it with that IP.
-  # It is recommended to specify the Security Group of the Target MSK Cluster using the source_security_group_id attribute, if possible.
-  cidr_blocks = ["0.0.0.0/0"]
+  # 대상 MSK 클러스터의 브로커 노드 IP를 지정할 수 있는 경우, 해당 IP로 교체하세요.  
+  # 가능하다면, source_security_group_id 속성을 사용하여 대상 MSK 클러스터의 보안 그룹을 지정하는 것을 권장합니다.
+  cidr_blocks = ["10.0.0.0/16"]
 
   # Enter the broker node port of the target MSK Cluster.
   from_port = 9098
@@ -83,27 +85,27 @@ module "replicator" {
   source_msk_cluster_arn  = "arn:aws:kafka:ap-northeast-2:123456789012:cluster/my-source-msk-cluster/abc12d3e-1234-5678-9012-95de01ee639c-s1"
   source_msk_cluster_name = "my-source-msk-cluster"
   source_msk_cluster_subnet_ids = ["source-msk-subnet-id-1", "source-msk-subnet-id-2"]
-  # Enter the subnet ID where the MSK Cluster is deployed.
-  # You need to add an ingress rule to the Security Group used in the Source MSK Cluster to allow the Replicator to access the Broker Nodes in the Source MSK Cluster.
+  # MSK 클러스터가 배포된 서브넷 ID를 입력하세요.  
+  # Replicator가 소스 MSK 클러스터의 브로커 노드에 접근할 수 있도록, 소스 MSK 클러스터에서 사용된 보안 그룹에 인그레스(ingress) 규칙을 추가해야 합니다.
   source_msk_cluster_security_groups_ids = [aws_security_group.this.id]
 
   target_msk_cluster_arn  = "arn:aws:kafka:ap-northeast-2:123456789012:cluster/my-target-msk-cluster/12d3eabc-4321-9876-5432-ee639c95de01-1s"
   target_msk_cluster_name = "my-target-msk-cluster"
   target_msk_cluster_subnet_ids = ["target-msk-subnet-id-1", "target-msk-subnet-id-2"]
-  # Enter the subnet ID where the MSK Cluster is deployed.
-  # You need to add an ingress rule to the Security Group being used on the Target MSK Cluster to allow the Replicator to access the Broker Nodes on the Target MSK Cluster.
+  # MSK 클러스터가 배포된 서브넷 ID를 입력하세요.  
+  # Replicator가 대상 MSK 클러스터의 브로커 노드에 접근할 수 있도록, 대상 MSK 클러스터에서 사용 중인 보안 그룹에 인그레스(ingress) 규칙을 추가해야 합니다.
   target_msk_cluster_security_groups_ids = [aws_security_group.this.id]
 
-  # All topics are eligible for replication.
+  # 모든 토픽이 복제 대상입니다.
   topics_to_replicate = ["*"]
 }
 ```
 
 ## Variables
 
-Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
+이 장에서는 tfmodule-aws-msk/replicator에서 사용되는 입력(Input) 및 출력(Output) 변수에 대해 설명합니다.
 
-### [Input Variables](https://oniops.github.io/tfmodule-aws-msk/readme-replicator-input-variables.html)
+### [Input Variables](https://oniops.github.io/tfmodule-aws-msk/readme-replicator-input-variables-ko.html)
 
 <table>
     <thead>
@@ -119,7 +121,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
     <tbody>
         <tr>
             <td>create</td>
-            <td>Determines whether replicator resources will be created.</td>
+            <td>Replicator 리소스 생성 유무를 결정 합니다.</td>
             <td>bool</td>
             <td>true</td>
             <td>no</td>
@@ -127,7 +129,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>context</td>
-            <td>Specify context values.This module uses the tfmodule-context Terraform module to define MSK services and resources, providing a standardized naming policy and tagging conventions, and a consistent datasource reference module.For more information about Context, see the <a href = "https://github.com/oniops/tfmodule-context">tfmodule-context</a>Terraform module.</td>
+            <td>이 모듈은 tfmodule-context Terraform 모듈을 사용하여 리소스를 정의하며, 표준화된 네이밍 정책, 태그 지정 규칙, 일관된 데이터 소스 참조 모듈을 제공합니다. Context에 대한 자세한 내용은 <a href="https://github.com/oniops/tfmodule-context">tfmodule-context</a> 모듈을 참고하세요.</td>
             <td>map(string)</td>
             <td></td>
             <td>yes</td>
@@ -146,7 +148,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>replicator_name</td>
-            <td>Name of the MSK Replicator. The name format depends on Context values. Please refer "name_prefix" value in <a href = "https://github.com/oniops/tfmodule-context">tfmodule-context</a> module.</td>
+            <td>Replicator의 이름을 지정합니다. 이름 형식은 Context 값에 따라 결정됩니다. "name_prefix" 변수에 대한 내용은 Context 모듈 <a href="https://github.com/oniops/tfmodule-context">tfmodule-context</a> 을 참고하세요.</td>
             <td>string</td>
             <td>null</td>
             <td>no</td>
@@ -154,7 +156,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>replicator_fullname</td>
-            <td>Fullname of the MSK Replicator. If you don't want to set auto-formatted MSK Replicator name due to Context values, you can specify this value.</td>
+            <td>Replicator의 전체 이름(Fullname)을 지정합니다. Context 값에 따라 자동 생성된 형식을 사용하지 않으려는 경우, 이 값을 직접 지정할 수 있습니다.</td>
             <td>string</td>
             <td>null</td>
             <td>no</td>
@@ -162,7 +164,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>additional_tags</td>
-            <td>Specify additional tags for resources created in this module. All default tags for all resources depend on Context values. Please refer "tags" value in <a href = "https://github.com/oniops/tfmodule-context">tfmodule-context</a> module.</td>
+            <td>이 모듈에서 생성되는 리소스에 대해 추가 태그를 지정하세요. 모든 리소스에 적용되는 기본 태그는 Context 값에 따라 결정됩니다. 변수 "tags" 에 대한 내용은 Context 모듈 <a href="https://github.com/oniops/tfmodule-context">tfmodule-context</a> 을 참고하세요.</td>
             <td>map(string)</td>
             <td>null</td>
             <td>no</td>
@@ -170,7 +172,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>description</td>
-            <td>Description of the MSK Replicator.</td>
+            <td>Replicator의 설명 입니다.</td>
             <td>string</td>
             <td>null</td>
             <td>no</td>
@@ -178,7 +180,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>source_msk_cluster_name</td>
-            <td>The name of source MSK Cluster. Topics in this MSK Cluster will be copied to target MSK Cluster.</td>
+            <td>소스 MSK 클러스터의 이름 입니다. 이 클러스터의 토픽이 대상 클러스터의 토픽으로 복제 됩니다.</td>
             <td>string</td>
             <td></td>
             <td>yes</td>
@@ -186,7 +188,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>source_msk_cluster_arn</td>
-            <td>The AWS ARN of source MSK Cluster. Topics in this MSK Cluster will be copied to target MSK Cluster.</td>
+            <td>소스 MSK 클러스터의 ARN 입니다. 이 클러스터의 토픽이 대상 클러스터의 토픽으로 복제 됩니다.</td>
             <td>string</td>
             <td></td>
             <td>yes</td>
@@ -194,7 +196,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>source_msk_cluster_subnet_ids</td>
-            <td>The list of source MSK cluster subnets to connect to in the virtual private cloud (VPC). AWS creates elastic network interfaces inside these subnets to allow communication between your MSK Cluster and the replicator.</td>
+            <td>가상 프라이빗 클라우드(VPC)에서 연결할 소스 MSK 클러스터 서브넷 목록입니다. AWS는 Replicator와 MSK 클러스터 간의 통신을 위해 이들 서브넷 내부에 탄력적 네트워크 인터페이스(ENI)를 생성합니다.</td>
             <td>list(string)</td>
             <td></td>
             <td>yes</td>
@@ -202,7 +204,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>source_msk_cluster_security_groups_ids</td>
-            <td>The source MSK cluster security groups to associate with the ENIs used by the replicator. If a security group is not specified, the default security group associated with the VPC is used.</td>
+            <td>Replicator가 사용하는 ENI에 연결할 소스 MSK 클러스터의 보안 그룹입니다. 보안 그룹을 지정하지 않으면, VPC에 연결된 기본 보안 그룹이 사용됩니다.</td>
             <td>list(string)</td>
             <td></td>
             <td>yes</td>
@@ -210,7 +212,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>target_msk_cluster_name</td>
-            <td>The name of target MSK Cluster. Topics in source MSK Cluster will be copied to this MSK Cluster.</td>
+            <td>대상 MSK 클러스터의 이름입니다. 소스 MSK 클러스터의 토픽들이 이 MSK 클러스터로 복제됩니다.</td>
             <td>string</td>
             <td></td>
             <td>yes</td>
@@ -218,7 +220,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>target_msk_cluster_arn</td>
-            <td>The AWS ARN of target MSK Cluster. Topics in source MSK Cluster will be copied to this MSK Cluster.</td>
+            <td>대상 MSK 클러스터의 ARN 입니다. 소스 MSK 클러스터의 토픽들이 이 MSK 클러스터로 복제됩니다.</td>
             <td>string</td>
             <td></td>
             <td>yes</td>
@@ -234,7 +236,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>target_msk_cluster_security_groups_ids</td>
-            <td>The target MSK cluster security groups to associate with the ENIs used by the replicator. If a security group is not specified, the default security group associated with the VPC is used.</td>
+            <td>가상 프라이빗 클라우드(VPC)에서 연결할 대상 MSK 클러스터 서브넷 목록입니다. AWS는 Replicator와 MSK 클러스터 간의 통신을 위해 이들 서브넷 내부에 탄력적 네트워크 인터페이스(ENI)를 생성합니다.</td>
             <td>list(string)</td>
             <td></td>
             <td>yes</td>
@@ -242,7 +244,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>target_compression_type</td>
-            <td>The type of compression to use writing records to target MSK cluster. Available options are NONE | GZIP | SNAPPY | LZ4 | ZSTD".</td>
+            <td>대상 MSK 클러스터에 복제할 때 사용할 압축 유형입니다. 지원하는 유형 : NONE | GZIP | SNAPPY | LZ4 | ZSTD".</td>
             <td>string</td>
             <td>"NONE"</td>
             <td>no</td>
@@ -250,7 +252,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>topic_name_configuration</td>
-            <td>Configuration for specifying replicated topic names should be the same as their corresponding upstream topics or prefixed with source cluster alias. Available options are PREFIXED_WITH_SOURCE_CLUSTER_ALIAS | IDENTICAL. If set PREFIXED_WITH_SOURCE_CLUSTER_ALIAS, copied topic name starts with source MSK Cluster name. If set IDENTICAL, copied topic name is the same as origin topic name.</td>
+            <td>복제된 토픽 이름을 지정하는 구성 방식입니다. 원본 토픽과 동일하게 유지하거나, 소스 클러스터 별칭을 접두사로 추가할 수 있습니다. 사용 가능한 옵션: PREFIXED_WITH_SOURCE_CLUSTER_ALIAS | IDENTICAL. PREFIXED_WITH_SOURCE_CLUSTER_ALIAS : 복제된 토픽 이름이 소스 MSK 클러스터 이름으로 시작합니다. IDENTICAL : 복제된 토픽 이름이 원본 토픽 이름과 동일합니다.</td>
             <td>string</td>
             <td>"PREFIXED_WITH_SOURCE_CLUSTER_ALIAS"</td>
             <td>no</td>
@@ -258,7 +260,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>topics_to_replicate</td>
-            <td>List of regular expression patterns indicating the topics to copy.</td>
+            <td>복제할 토픽을 지정하는 정규 표현식 패턴 목록입니다.</td>
             <td>list(string)</td>
             <td>[".*"]</td>
             <td>no</td>
@@ -266,7 +268,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>topics_to_exclude</td>
-            <td>List of regular expression patterns indicating the topics that should not be replica.</td>
+            <td>복제하지 않을 토픽을 지정하는 정규 표현식 패턴 목록입니다.</td>
             <td>list(string)</td>
             <td>null</td>
             <td>no</td>
@@ -274,7 +276,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>detect_and_copy_new_topics</td>
-            <td>Whether to periodically check for new topics and partitions.</td>
+            <td>새로운 토픽과 파티션을 주기적으로 확인할지 여부입니다.</td>
             <td>bool</td>
             <td>true</td>
             <td>no</td>
@@ -282,7 +284,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>copy_access_control_lists_for_topics</td>
-            <td>Whether to periodically configure remote topic ACLs to match their corresponding upstream topics.</td>
+            <td>원본 토픽에 맞춰 대상 토픽의 ACL(액세스 제어 목록)을 주기적으로 구성할지 여부입니다.</td>
             <td>bool</td>
             <td>true</td>
             <td>no</td>
@@ -290,7 +292,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>copy_topic_configurations</td>
-            <td>Whether to periodically configure remote topics to match their corresponding upstream topics.</td>
+            <td>원본 토픽에 맞춰 대상 토픽을 주기적으로 구성할지 여부입니다.</td>
             <td>bool</td>
             <td>true</td>
             <td>no</td>
@@ -298,7 +300,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>starting_position</td>
-            <td>Configuration for specifying the position(offset) in the topics to start replicating from. Available options are LATEST | EARLIEST. If set LATEST, it copies from latest message in the topic. If set EARLIEST, it copies from beginning of topic.</td>
+            <td>복제를 시작할 토픽의 위치(오프셋)를 지정하는 설정입니다. 사용 가능한 옵션: LATEST | EARLIEST. LATEST : 토픽의 가장 최신 메시지부터 복제합니다. EARLIEST : 토픽의 처음부터 복제합니다.</td>
             <td>string</td>
             <td>"LATEST"</td>
             <td>no</td>
@@ -306,7 +308,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>consumer_groups_to_replicate</td>
-            <td>List of regular expression patterns indicating the consumer groups to copy.</td>
+            <td>복제할 컨슈머 그룹을 지정하는 정규 표현식 패턴 목록입니다.</td>
             <td>list(string)</td>
             <td>[".*"]</td>
             <td>no</td>
@@ -314,7 +316,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>consumer_groups_to_exclude</td>
-            <td>List of regular expression patterns indicating the consumer groups that should not be replicated.</td>
+            <td>복제하지 않을 컨슈머 그룹을 지정하는 정규 표현식 패턴 목록입니다.</td>
             <td>list(string)</td>
             <td>null</td>
             <td>no</td>
@@ -322,7 +324,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>detect_and_copy_new_consumer_groups</td>
-            <td>Whether to periodically check for new consumer groups to copy.</td>
+            <td>복제할 새로운 컨슈머 그룹을 주기적으로 확인할지 여부입니다.</td>
             <td>bool</td>
             <td>true</td>
             <td>no</td>
@@ -330,7 +332,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         </tr>
         <tr>
             <td>synchronise_consumer_group_offsets</td>
-            <td>Whether to periodically write the translated offsets to __consumer_offsets topic in target cluster.</td>
+            <td>변환된 오프셋을 대상 클러스터의 __consumer_offsets 토픽에 주기적으로 기록할지 여부입니다.</td>
             <td>bool</td>
             <td>true</td>
             <td>no</td>
@@ -353,7 +355,7 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
         <tbody>
         <tr>
             <td>arn</td>
-            <td>Amazon Resource Name (ARN) of the MSK Replicator.</td>
+            <td>Replicator의 ARN 입니다.</td>
             <td>string</td>
             <td>"arn:aws:kafka:us-east-1:111122223333:configuration/my-msk-replicator/11112222-3344-5566-7788-152f5289c6dd-14"</td>
         </tr>
@@ -361,6 +363,5 @@ Describes the Input/Output variables used in tfmodule-aws-msk/replicator.
 </table>
 
 # LICENSE
-
-- This module is customized from [terraform-aws-msk-kafka-cluster](https://github.com/terraform-aws-modules/terraform-aws-msk-kafka-cluster), and follows the license policy of [terraform-aws-msk-kafka-cluster](https://github.com/terraform-aws-modules/terraform-aws-msk-kafka-cluster). 
-- See for Apache-2.0 [LICENSE](https://github.com/oniops/tfmodule-aws-msk/blob/main/LICENSE).
+- Apache-2.0 [LICENSE](https://github.com/oniops/tfmodule-aws-msk/blob/main/LICENSE).
+- 이 모듈은 [terraform-aws-msk-kafka-cluster](https://github.com/terraform-aws-modules/terraform-aws-msk-kafka-cluster) 모듈을 커스터마이징 하였습니다. 또한 해당 모듈의 라이선스 정책을 그대로 따릅니다.

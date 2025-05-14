@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MSK Cluster Input Variables</title>
+    <style>
+        table, td, th {
+            border : 1px solid black;
+            padding: 10px;
+            border-collapse : collapse;
+        }
+    </style>
+</head>
+<body>
+
+<table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Type</th>
+        <th>Example</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>arn</td>
+        <td>MSK 클러스터의 ARN 입니다.</td>
+        <td>string</td>
+        <td>"arn:aws:kafka:us-east-1:111122223333:cluster/demomsk/11112222-3344-5566-7788-152f5289c6dd-14"</td>
+    </tr>
+    <tr>
+        <td>cluster_name</td>
+        <td>MSK 클러스터의 이름 입니다.</td>
+        <td>string</td>
+        <td>"my-msk-cluster"</td>
+    </tr>
+    <tr>
+        <td>cluster_uuid</td>
+        <td>IAM Policy에서 일반적으로 사용되는 MSK 클러스터의 UUID 입니다./td>
+        <td>string</td>
+        <td>"11112222-3344-5566-7788-152f5289c6dd-14"</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_plaintext</td>
+        <td>Kafka 클러스터에 대한 연결을 부트스트랩하는 데 사용할 수 있는 하나 이상의 kafka 브로커의 hostname:port 쌍을 쉼표로 구분한 목록입니다. 이 값은 encryption_in_transit_client_broker가 PLAINTEXT 또는 TLS_PLAINTEXT로 설정된 경우에 포함됩니다.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9092","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9092"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_sasl_iam</td>
+        <td>하나 이상의 DNS 이름(또는 IP 주소)과 SASL IAM 포트 쌍입니다. 이 속성은 encryption_in_transit_client_broker가 TLS_PLAINTEXT 또는 TLS로 설정되고, client_authentication_sasl_iam이 true로 설정된 경우에 값을 가집니다.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9098","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9098"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_sasl_scram</td>
+        <td>하나 이상의 DNS 이름(또는 IP 주소)과 SASL SCRAM 포트 쌍입니다. 이 속성은 `encryption_in_transit_client_broker`가 `TLS_PLAINTEXT` 또는 `TLS`로 설정되고, `client_authentication_sasl_scram`이 `true`로 설정된 경우에 값을 가집니다.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9096","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9096"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_tls</td>
+        <td>하나 이상의 DNS 이름(또는 IP 주소)과 TLS 포트 쌍입니다. 이 속성은 `encryption_in_transit_client_broker`가 `TLS_PLAINTEXT` 또는 `TLS`로 설정된 경우에 값을 가집니다.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9094","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9094"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers</td>
+        <td>Kafka 클러스터에 대한 연결을 위한 하나 이상의 kafka 브로커의 `hostname:port` 쌍을 쉼표로 구분한 주소 목록입니다.</td>
+        <td>list(string)</td>
+        <td>["b-1.demomsk.112233.c14.kafka.us-east-1.amazonaws.com:9092","b-2.demomsk.445566.c14.kafka.us-east-1.amazonaws.com:9098"]</td>
+    </tr>
+    <tr>
+        <td>bootstrap_brokers_authentication</td>
+        <td>클라이언트 인증을 위한 브로커 인증 방식의 이름 문자열입니다. `SASL_IAM` : IAM 인증, `SASL_SCRAM` : SASL/SCRAM 인증, `TLS` : Mutual TLS 인증</td>
+        <td>string</td>
+        <td>"SASL_IAM"</td>
+    </tr>
+    <tr>
+        <td>zookeeper_connect_string</td>
+        <td>Apache Zookeeper 연결에 사용할 하나 이상의 `hostname:port` 쌍을 쉼표로 구분한 주소 목록입니다. 반환되는 값은 알파벳 순으로 정렬됩니다.</td>
+        <td>list(string)</td>
+        <td>["z-3.demomsk.aabbcc.c14.kafka.us-east-1.amazonaws.com:2181","z-1.demomsk.11aabb.c14.kafka.us-east-1.amazonaws.com":2181,"z-2.demomsk.abcd1234.c14.kafka.us-east-1.amazonaws.com:2181"]</td>
+    </tr>
+    <tr>
+        <td>zookeeper_connect_string_tls</td>
+        <td>Apache Zookeeper 클러스터에 TLS를 통해 연결할 때 사용할 하나 이상의 `hostname:port` 쌍을 쉼표로 구분한 주소 목록입니다. 반환되는 값은 알파벳 순으로 정렬됩니다.</td>
+        <td>list(string)</td>
+        <td>["z-3.demomsk.aabbcc.c14.kafka.us-east-1.amazonaws.com:2182","z-1.demomsk.11aabb.c14.kafka.us-east-1.amazonaws.com":2182,"z-2.demomsk.abcd1234.c14.kafka.us-east-1.amazonaws.com:2182"]</td>
+    </tr>
+    <tr>
+        <td>configuration_arn</td>
+        <td>MSK 클러스터 Configuration의 ARN 입니다.</td>
+        <td>string</td>
+        <td>"arn:aws:kafka:us-east-1:111122223333:configuration/demomskcfg/1234abcd-1111-2222-33aa-aaaabbbbcccc-14"</td>
+    </tr>
+    <tr>
+        <td>configuration_latest_revision</td>
+        <td>MSK 클러스터 Configuration의 최신 Revision 입니다.</td>
+        <td>string</td>
+        <td>"7"</td>
+    </tr>
+    <tr>
+        <td>scram_secret_association_id</td>
+        <td>MSK SCRAM secret 연결의 ID 입니다.</td>
+        <td>string</td>
+        <td>"arn:aws:kafka:us-east-1:111122223333:cluster/demomsk/abcd1234-abcd-5678-abcd-1234abcd5678-1/scram-secret-association/efgh5678-ijkl-9012-mnop-3456qrst7890"</td>
+    </tr>
+    <tr>
+        <td>log_group_arn</td>
+        <td>Cloudwatch log group의 ARN 입니다.</td>
+        <td>string</td>
+        <td>"arn:aws:logs:us-east-1:111122223333:log-group:/msk/demomsk"</td>
+    </tr>
+    <tr>
+        <td>appautoscaling_policy_arn</td>
+        <td>Autoscaling Policy의 ARN 입니다.</td>
+        <td>string</td>
+        <td>"arn:aws:autoscaling:us-east-1:111122223333:scalingPolicy:11112222-3333-aabb-4444-555566667777:resource/msk/default/demomsk:pplocyName/my-as-policy-name"</td>
+    </tr>
+    <tr>
+        <td>appautoscaling_policy_name</td>
+        <td>Autoscaling Policy의 이름 입니다.</td>
+        <td>string</td>
+        <td>"my-as-policy-name"</td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
