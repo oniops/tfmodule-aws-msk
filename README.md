@@ -12,12 +12,13 @@ cd tfmodule-aws-msk
 ## Context
 This module uses the tfmodule-context Terraform module to define MSK services and resources, providing a standardized naming policy and tagging conventions for AWS Best Practice model, and a consistent datasource reference module.
 <br>
-For more information about Context, see the <a href="https://github.com/oniops/tfmodule-context">tfmodule-context</a> Terraform module.
+For more information about Context, see the [tfmodule-context](https://github.com/oniops/tfmodule-context) Terraform module.
 
 ## Usage
 
 ### Example 1 : Provisioned MSK Cluster - Standard Type Broker
-
+For more details about Provisioned MSK Cluster - Standard Type Broker, Please see [this AWS Documentation](https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/msk-broker-types-standard.html).
+<br>
 This chapter explains how to provision standard type of broker node with provisioned type of MSK Cluster. The client authentication for broker node is SASL/IAM.
 
 ```hcl
@@ -144,7 +145,8 @@ The authentication SASL/IAM to connect to broker node is controlled by IAM Polic
 <br>
 
 ### Example 2 : Provisioned MSK Cluster - Express Type Broker
-
+For more details about Provisioned MSK Cluster - Express Type Broker, Please see [this AWS Documentation](https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/msk-broker-types-express.html).
+<br>
 This chapter explains how to provision express type of broker node with provisioned type of MSK Cluster. The client authentication for broker node is SASL/IAM.
 
 ```hcl
@@ -219,7 +221,8 @@ Supported instance types for Express type of broker node are below :
 <br>
 
 ### Example 3 : Serverless MSK Cluster
-
+For more details about Serverless MSK Cluster, Please see [this AWS Documentation](https://docs.aws.amazon.com/ko_kr/msk/latest/developerguide/serverless.html).
+<br>
 This chapter explains how to provision serverless type of MSK Cluster. The client authentication for broker node is SASL/IAM.
 
 ```hcl
@@ -1034,6 +1037,37 @@ After executing the script, data shows like :
 GROUP                 TOPIC           PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID
 {CONSUMER GROUP ID}   example-topic   0          2               2               0               -               -               -
 ```
+
+If you'd like to change offset, run below command :
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-consumer-groups.sh \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --command-config kafka_2.13-{YOUR MSK VERSION}/config/client.properties \
+    --reset-offsets \
+    --topic "example-topic" \
+    --group "{CONSUMER GROUP ID}"
+    --to-offset {OFFSET TO CHANGE} \
+    --execute
+```
+
+Then, check applied offset using below command :
+
+```sh
+kafka_2.13-{YOUR MSK VERSION}/bin/kafka-consumer-groups.sh \
+    --bootstrap-server "{YOUR KAFKA ENDPOINT}" \
+    --command-config kafka_2.13-{YOUR MSK VERSION}/config/client.properties \
+    --describe \
+    --group "{CONSUMER GROUP ID}"
+```
+
+After executing the script, data shows like :
+
+```sh
+GROUP                 TOPIC           PARTITION  CURRENT-OFFSET      LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID
+{CONSUMER GROUP ID}   example-topic   0          {OFFSET TO CHANGE}  2               0               -               -               -
+```
+
 
 ### Partition
 
